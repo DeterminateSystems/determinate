@@ -1,7 +1,7 @@
 # Determinate
 
 [Determinate Systems'][detsys] validated [Nix], configured for [FlakeHub] and bundled with [`fh`][fh], the CLI for FlakeHub.
-To apply it to your flake:
+To add it to a [flake][flakes]:
 
 ```nix
 {
@@ -14,7 +14,15 @@ To apply it to your flake:
 
 ## NixOS
 
-You can quickly set up Determinate on [NixOS] using the NixOS module:
+You can quickly set up Determinate on [NixOS] using the NixOS module.
+These options are available:
+
+| Parameter                               | Description                                          | Default                                                                                                |
+| :-------------------------------------- | :--------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             |                                                                                                        |
+| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
+
+Here's an example configuration:
 
 ```nix
 {
@@ -33,16 +41,17 @@ You can quickly set up Determinate on [NixOS] using the NixOS module:
 }
 ```
 
-These parameters are available:
-
-| Parameter                               | Description                                          | Default                                                                                                |
-| :-------------------------------------- | :--------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
-| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             |                                                                                                        |
-| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
-
 ## nix-darwin
 
-Here's an example [nix-darwin] configuration that uses Determinate's nix-darwin module:
+You can quickly set up Determinate on macOS using the [nix-darwin] module.
+These options are available:
+
+| Parameter                               | Description                                          | Default                                                                                                    |
+| :-------------------------------------- | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             |                                                                                                            |
+| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/var/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
+
+Here's an example configuration:
 
 ```nix
 {
@@ -61,22 +70,18 @@ Here's an example [nix-darwin] configuration that uses Determinate's nix-darwin 
 }
 ```
 
-These parameters are available:
-
-| Parameter                               | Description                                          | Default                                                                                                    |
-| :-------------------------------------- | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
-| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             |                                                                                                            |
-| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/var/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
-
 ## Home Manager
 
-The Determinate [Home Manager module][hm] functions a bit differently depending on whether the Nix user is [trusted](#trusted-user) or [untrusted](#untrusted-user).
+You can quickly set up Determinate on Linux or macOS using the [Home Manager][hm] module.
+These options are available:
 
 | Parameter                               | Description                                          | Default                                                                                                    |
 | :-------------------------------------- | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
 | `determinate.nix.primaryUser.username`  | The Determinate Nix user                             | The [`home.username`][hm-username] parameter in the Home Manager configuration                             |
 | `determinate.nix.primaryUser.isTrusted` | Whether the Determinate Nix user is a trusted user   | Whether `determinate.nix.primaryUser.username` equals `"root"                                              |
 | `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/var/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
+
+The Determinate [Home Manager module][hm] functions a bit differently depending on whether the Nix user is [trusted](#trusted-user) or [untrusted](#untrusted-user).
 
 ### Trusted user
 
@@ -158,6 +163,7 @@ Then you can apply a Home Manager configuration along these lines:
 [detsys]: https://determinate.systems
 [fh]: https://github.com/DeterminateSystems/fh
 [flakehub]: https://flakehub.com
+[flakes]: https://zero-to-nix.com/concepts/flakes
 [follows]: https://zero-to-nix.com/concepts/flakes#inputs
 [hm]: https://github.com/nix-community/home-manager
 [netrc]: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
