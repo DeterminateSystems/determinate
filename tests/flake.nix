@@ -45,13 +45,12 @@
       system = "aarch64-darwin";
 
       modules = [{
-          imports = [
-            determinate.darwinModules.default
-          ];
+        imports = [
+          determinate.darwinModules.default
+        ];
 
-          determinate.nix.primaryUser = "example";
-        }
-      ];
+        determinate.nix.primaryUser = "example";
+      }];
     }).system;
   };
 }
