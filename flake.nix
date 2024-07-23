@@ -1,5 +1,5 @@
 {
-  description = "";
+  description = "Determinate";
 
   inputs = {
     fh.url = "https://flakehub.com/f/DeterminateSystems/fh/0.1";
@@ -24,7 +24,6 @@
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         inherit system;
         pkgs = pkgsFor system;
-        lib = nixpkgs.lib;
       });
     in
     {
@@ -80,14 +79,15 @@
           inputs.nix.darwinModules.default
         ];
 
-
         options = {
           determinate.nix.primaryUser = lib.mkOption {
             type = lib.types.str;
+            description = "The Determinate Nix user";
           };
 
           determinate.nix.primaryUserNetrc = lib.mkOption {
             type = lib.types.str;
+            description = "The path to the `netrc` file for the user configured by `primaryUser`";
             default =
               let
                 unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser;
@@ -122,10 +122,12 @@
         options = {
           determinate.nix.primaryUser = lib.mkOption {
             type = lib.types.str;
+            description = "The Determinate Nix user";
           };
 
           determinate.nix.primaryUserNetrc = lib.mkOption {
             type = lib.types.str;
+            description = "The path to the `netrc` file for the user configured by `primaryUser`";
             default =
               let
                 unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser;
