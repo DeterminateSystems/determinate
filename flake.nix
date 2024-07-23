@@ -80,6 +80,8 @@
             inputs.fh.packages."${pkgs.stdenv.system}".default
           ];
 
+          # The `netrc-file` and `extra-trusted-public-keys` settings are privileged and so
+          # they're applied only if `primaryUser.isTrusted` is set to `true`
           nix.settings = lib.mkMerge [
             (lib.optionalAttrs (config.determinate.nix.primaryUser.isTrusted) {
               netrc-file = config.determinate.nix.primaryUser.netrcPath;
