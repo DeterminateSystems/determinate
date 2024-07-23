@@ -45,7 +45,7 @@ Here's an example [nix-darwin] configuration that uses Determinate's nix-darwin 
         determinate.darwinModules.default
 
         # Set this value somewhere in your own configuration
-        { determinate.nix.primaryUser.name = "<your-username>"; }
+        { determinate.nix.primaryUser.username = "<your-username>"; }
       ];
     };
   };
@@ -78,7 +78,7 @@ For a trusted user, apply a configuration like this (note the `isTrusted` parame
 
           # Required configuration parameters
           {
-            determinate.nix.primaryUser.name = "<your-username>";
+            determinate.nix.primaryUser.username = "<your-username>";
             determinate.nix.primaryUser.isTrusted = true;
           }
         ];
@@ -120,7 +120,7 @@ Then you can apply a Home Manager configuration along these lines:
 
           # Required configuration parameters
           {
-            determinate.nix.primaryUser.name = "<your-username>";
+            determinate.nix.primaryUser.username = "<your-username>";
           }
         ];
       };

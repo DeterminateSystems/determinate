@@ -46,7 +46,7 @@
         ];
 
         options = {
-          determinate.nix.primaryUser.name = lib.mkOption {
+          determinate.nix.primaryUser.username = lib.mkOption {
             type = lib.types.str;
             description = "The Determinate Nix user";
           };
@@ -54,13 +54,13 @@
           determinate.nix.primaryUser.netrcPath = lib.mkOption {
             type = lib.types.path;
             description = "The path to the `netrc` file for the user configured by `primaryUser`";
-            default = "${if pkgs.stdenv.isDarwin then "/Users" else "/home"}/${config.determinate.nix.primaryUser.name}/.local/share/flakehub/netrc";
+            default = "${if pkgs.stdenv.isDarwin then "/Users" else "/home"}/${config.determinate.nix.primaryUser.username}/.local/share/flakehub/netrc";
           };
 
           determinate.nix.primaryUser.isTrusted = lib.mkOption {
             type = lib.types.bool;
             description = "Whether the Determinate Nix user is a trusted user";
-            default = false;
+            default = config.determinate.nix.primaryUser.username == "root";
           };
         };
 
@@ -93,7 +93,7 @@
         ];
 
         options = {
-          determinate.nix.primaryUser.name = lib.mkOption {
+          determinate.nix.primaryUser.username = lib.mkOption {
             type = lib.types.str;
             description = "The Determinate Nix user";
           };
@@ -101,7 +101,7 @@
           determinate.nix.primaryUser.netrcPath = lib.mkOption {
             type = lib.types.path;
             description = "The path to the `netrc` file for the user configured by `primaryUser`";
-            default = "/Users/${config.determinate.nix.primaryUser.name}/.local/share/flakehub/netrc";
+            default = "/Users/${config.determinate.nix.primaryUser.username}/.local/share/flakehub/netrc";
           };
         };
 
@@ -128,7 +128,7 @@
         ];
 
         options = {
-          determinate.nix.primaryUser.name = lib.mkOption {
+          determinate.nix.primaryUser.username = lib.mkOption {
             type = lib.types.str;
             description = "The Determinate Nix user";
           };
@@ -136,7 +136,7 @@
           determinate.nix.primaryUser.netrcPath = lib.mkOption {
             type = lib.types.path;
             description = "The path to the `netrc` file for the user configured by `primaryUser`";
-            default = "/home/${config.determinate.nix.primaryUser.name}/.local/share/flakehub/netrc";
+            default = "/home/${config.determinate.nix.primaryUser.username}/.local/share/flakehub/netrc";
           };
         };
 

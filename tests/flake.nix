@@ -23,7 +23,7 @@
             fsType = "ext4";
           };
           boot.loader.grub.devices = [ "/dev/bogus" ];
-          determinate.nix.primaryUser.name = "example";
+          determinate.nix.primaryUser.username = "example";
         }
       ];
     }).config.system.build.toplevel;
@@ -35,7 +35,7 @@
         determinate.homeManagerModules.default
         {
           determinate.nix.primaryUser = {
-            name = "example";
+            username = "example";
             isTrusted = true;
           };
 
@@ -52,7 +52,7 @@
       modules = [
         determinate.darwinModules.default
 
-        { determinate.nix.primaryUser.name = "example"; }
+        { determinate.nix.primaryUser.username = "example"; }
       ];
     }).system;
   };
