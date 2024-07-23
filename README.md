@@ -26,7 +26,7 @@
 ```
 
 > [!WARNING]
-> We recommend not using a [`follows`][follows] directive for [Nixpkgs] (`inputs.nixpkgs.follows = "nixpkgs"`) in conjunction with the Determinate flake, as that blocks access to artifacts cached in [FlakeHub Cache][cache].
+> We recommend not using a [`follows`][follows] directive for [Nixpkgs] (`inputs.nixpkgs.follows = "nixpkgs"`) in conjunction with the Determinate flake, as it leads to cache misses for artifacts otherwise available from [FlakeHub Cache][cache].
 
 ## nix-darwin
 
