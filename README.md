@@ -75,11 +75,11 @@ Here's an example configuration:
 You can quickly set up Determinate on Linux or macOS using the [Home Manager][hm] module.
 These options are available:
 
-| Parameter                               | Description                                          | Default                                                                                                    |
-| :-------------------------------------- | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
-| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             | The [`home.username`][hm-username] parameter in the Home Manager configuration                             |
-| `determinate.nix.primaryUser.isTrusted` | Whether the Determinate Nix user is a trusted user   | Whether `determinate.nix.primaryUser.username` equals `"root"                                              |
-| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/var/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
+| Parameter                               | Description                                          | Default                                                                                                                                                                  |
+| :-------------------------------------- | :--------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             | The [`home.username`][hm-username] parameter in the Home Manager configuration                                                                                           |
+| `determinate.nix.primaryUser.isTrusted` | Whether the Determinate Nix user is a trusted user   | Whether `determinate.nix.primaryUser.username` equals `"root"`                                                                                                           |
+| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/var/root/.local/share/flakehub/netrc` (macOS root user), `/root/.local/share/flakehub/netrc` (Linux root user), or `$HOME/.local/share/flakehub/netrc` (non-root user) |
 
 The Determinate [Home Manager module][hm] functions a bit differently depending on whether the Nix user is [trusted](#trusted-user) or [untrusted](#untrusted-user).
 
