@@ -54,12 +54,7 @@
           determinate.nix.primaryUser.netrcPath = lib.mkOption {
             type = lib.types.path;
             description = "The path to the `netrc` file for the user configured by `primaryUser`";
-            default =
-              let
-                unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser.name;
-                rootLocation = if pkgs.stdenv.isDarwin then "/var/root" else "/root";
-              in
-              if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
+            default = "${if pkgs.stdenv.isDarwin then "/Users" else "/home"}/${config.determinate.nix.primaryUser.name}/.local/share/flakehub/netrc";
           };
 
           determinate.nix.primaryUser.isTrusted = lib.mkOption {
@@ -106,12 +101,7 @@
           determinate.nix.primaryUser.netrcPath = lib.mkOption {
             type = lib.types.path;
             description = "The path to the `netrc` file for the user configured by `primaryUser`";
-            default =
-              let
-                unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser.name;
-                rootLocation = if pkgs.stdenv.isDarwin then "/var/root" else "/root";
-              in
-              if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
+            default = "/Users/${config.determinate.nix.primaryUser.name}/.local/share/flakehub/netrc";
           };
         };
 
@@ -146,12 +136,7 @@
           determinate.nix.primaryUser.netrcPath = lib.mkOption {
             type = lib.types.path;
             description = "The path to the `netrc` file for the user configured by `primaryUser`";
-            default =
-              let
-                unprivUserLocation = "/home/" + config.determinate.nix.primaryUser.name;
-                rootLocation = "/root";
-              in
-              if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
+            default = "/home/${config.determinate.nix.primaryUser.name}/.local/share/flakehub/netrc";
           };
         };
 

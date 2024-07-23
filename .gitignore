@@ -1,1 +1,4 @@
-result
+result*
+
+# Test artifacts
+tests/flake.lock
