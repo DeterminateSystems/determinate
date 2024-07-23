@@ -134,6 +134,7 @@ Then you can apply a Home Manager configuration along these lines:
 [flakehub]: https://flakehub.com
 [follows]: https://zero-to-nix.com/concepts/flakes#inputs
 [hm]: https://github.com/nix-community/home-manager
+[nix]: https://zero-to-nix.com/concepts/nix
 [nix-conf]: https://nix.dev/manual/nix/latest/command-ref/conf-file
 [nix-darwin]: https://github.com/LnL7/nix-darwin
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
