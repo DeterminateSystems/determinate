@@ -1,8 +1,20 @@
 # Determinate
 
 [Determinate Systems'][detsys] validated [Nix], configured for [FlakeHub] and bundled with [`fh`][fh], the CLI for FlakeHub.
+To apply it to your flake:
+
+```nix
+{
+  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0";
+}
+```
+
+> [!WARNING]
+> We recommend not using a [`follows`][follows] directive for [Nixpkgs] (`inputs.nixpkgs.follows = "nixpkgs"`) in conjunction with the Determinate flake, as it leads to cache misses for artifacts otherwise available from [FlakeHub Cache][cache].
 
 ## NixOS
+
+You can quickly set up Determinate on [NixOS] using the NixOS module:
 
 ```nix
 {
@@ -13,20 +25,20 @@
     nixosConfigurations.my-workstation = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        ({ pkgs, ... }: {
-          imports = [
-            determinate.nixosModules.default
-          ];
-          # the rest of your configuration
-        })
+        # Load the Determinate module
+        determinate.nixosModules.default
       ];
     };
   };
 }
 ```
 
-> [!WARNING]
-> We recommend not using a [`follows`][follows] directive for [Nixpkgs] (`inputs.nixpkgs.follows = "nixpkgs"`) in conjunction with the Determinate flake, as it leads to cache misses for artifacts otherwise available from [FlakeHub Cache][cache].
+These parameters are available:
+
+| Parameter                               | Description                                          | Default                                                                                                |
+| :-------------------------------------- | :--------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             |                                                                                                        |
+| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
 
 ## nix-darwin
 
@@ -43,21 +55,28 @@ Here's an example [nix-darwin] configuration that uses Determinate's nix-darwin 
       modules = [
         # Load the Determinate module
         determinate.darwinModules.default
-
-        # Set this value somewhere in your own configuration
-        { determinate.nix.primaryUser.username = "<your-username>"; }
       ];
     };
   };
 }
 ```
 
+These parameters are available:
+
+| Parameter                               | Description                                          | Default                                                                                                    |
+| :-------------------------------------- | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             |                                                                                                            |
+| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/var/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
+
 ## Home Manager
 
 The Determinate [Home Manager module][hm] functions a bit differently depending on whether the Nix user is [trusted](#trusted-user) or [untrusted](#untrusted-user).
 
-> [!INFO]
-> By default, `determinate.nix.primaryUser.username` is provided by Home Manager's [`home.username`][hm-username] parameter but you can supply your own.
+| Parameter                               | Description                                          | Default                                                                                                    |
+| :-------------------------------------- | :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `determinate.nix.primaryUser.username`  | The Determinate Nix user                             | The [`home.username`][hm-username] parameter in the Home Manager configuration                             |
+| `determinate.nix.primaryUser.isTrusted` | Whether the Determinate Nix user is a trusted user   | Whether `determinate.nix.primaryUser.username` equals `"root"                                              |
+| `determinate.nix.primaryUser.netrcPath` | The path to the primary user's [`netrc`][netrc] file | `/var/root/.local/share/flakehub/netrc` (root user) or `$HOME/.local/share/flakehub/netrc` (non-root user) |
 
 ### Trusted user
 
@@ -77,6 +96,7 @@ For a trusted user, apply a configuration like this (note the `isTrusted` parame
         inherit pkgs;
 
         modules = [
+          # Load the Determinate module
           determinate.homeManagerModules.default
 
           {
@@ -121,6 +141,7 @@ Then you can apply a Home Manager configuration along these lines:
         inherit pkgs;
 
         modules = [
+          # Load the Determinate module
           determinate.homeManagerModules.default
 
           {
@@ -139,8 +160,10 @@ Then you can apply a Home Manager configuration along these lines:
 [flakehub]: https://flakehub.com
 [follows]: https://zero-to-nix.com/concepts/flakes#inputs
 [hm]: https://github.com/nix-community/home-manager
+[netrc]: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 [nix]: https://zero-to-nix.com/concepts/nix
 [nix-conf]: https://nix.dev/manual/nix/latest/command-ref/conf-file
 [nix-darwin]: https://github.com/LnL7/nix-darwin
+[nixos]: https://zero-to-nix.com/concepts/nixos
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
 [hm-username]: https://nix-community.github.io/home-manager/options.xhtml#opt-home.username

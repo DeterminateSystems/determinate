@@ -93,7 +93,6 @@
         };
       };
 
-
       darwinModules.default = { lib, config, pkgs, ... }: {
         imports = [
           inputs.nix.darwinModules.default
