@@ -41,6 +41,40 @@
           };
         });
 
+      homeManagerModules.default = { lib, config, pkgs, ... }: {
+        imports = [
+          inputs.nix.homeManagerModules.default
+        ];
+
+        options = {
+          determinate.nix.primaryUser = lib.mkOption {
+            type = lib.types.str;
+            default = config.home.username;
+          };
+
+          determinate.nix.primaryUserNetrc = lib.mkOption {
+            type = lib.types.str;
+            default =
+              let
+                unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser;
+                rootLocation = if pkgs.stdenv.isDarwin then "/var/root" else "/root";
+              in
+              if config.determinate.nix.primaryUser == "root" then rootLocation else unprivUserLocation;
+          };
+        };
+
+        config = {
+          home.packages = [
+            inputs.fh.packages."${pkgs.stdenv.system}".default
+          ];
+
+          nix.settings = {
+            extra-substituters = [ "https://cache.flakehub.com" ];
+          };
+        };
+      };
+
+
       darwinModules.default = { lib, config, pkgs, ... }: {
         imports = [
           inputs.nix.darwinModules.default

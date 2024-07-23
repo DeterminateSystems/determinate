@@ -6,6 +6,10 @@
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    home-manager = {
+      url = "github:nix-community/home-manager/release-24.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { nixpkgs, determinate, home-manager, nix-darwin, ... }: {
@@ -19,12 +23,13 @@
             fsType = "ext4";
           };
           boot.loader.grub.devices = [ "/dev/bogus" ];
+          determinate.nix.primaryUser = "example";
         }
       ];
     }).config.system.build.toplevel;
 
-    checks.x86_64-linux.home-manager = (home-manager.lib.homeManagerConfiguration {
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    checks.aarch64-darwin.home-manager = (home-manager.lib.homeManagerConfiguration {
+      pkgs = nixpkgs.legacyPackages.aarch64-darwin;
 
       modules = [
         determinate.homeManagerModules.default
@@ -44,7 +49,7 @@
             determinate.darwinModules.default
           ];
 
-          determinate.nix.primaryUser = "grahamc";
+          determinate.nix.primaryUser = "example";
         }
       ];
     }).system;
