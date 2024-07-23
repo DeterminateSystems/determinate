@@ -56,6 +56,9 @@ Here's an example [nix-darwin] configuration that uses Determinate's nix-darwin 
 
 The Determinate [Home Manager module][hm] functions a bit differently depending on whether the Nix user is [trusted](#trusted-user) or [untrusted](#untrusted-user).
 
+> [!INFO]
+> By default, `determinate.nix.primaryUser.username` is provided by Home Manager's [`home.username`][hm-username] parameter but you can supply your own.
+
 ### Trusted user
 
 For a trusted user, apply a configuration like this (note the `isTrusted` parameter):
@@ -76,10 +79,12 @@ For a trusted user, apply a configuration like this (note the `isTrusted` parame
         modules = [
           determinate.homeManagerModules.default
 
-          # Required configuration parameters
           {
-            determinate.nix.primaryUser.username = "<your-username>";
+            # Required if a trusted user
             determinate.nix.primaryUser.isTrusted = true;
+
+            # Optional; defaults to `home.username` in Home Manager
+            determinate.nix.primaryUser.username = "<your-username>";
           }
         ];
       };
@@ -118,8 +123,8 @@ Then you can apply a Home Manager configuration along these lines:
         modules = [
           determinate.homeManagerModules.default
 
-          # Required configuration parameters
           {
+            # Optional; defaults to `home.username` in Home Manager
             determinate.nix.primaryUser.username = "<your-username>";
           }
         ];
@@ -138,3 +143,4 @@ Then you can apply a Home Manager configuration along these lines:
 [nix-conf]: https://nix.dev/manual/nix/latest/command-ref/conf-file
 [nix-darwin]: https://github.com/LnL7/nix-darwin
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
+[hm-username]: https://nix-community.github.io/home-manager/options.xhtml#opt-home.username
