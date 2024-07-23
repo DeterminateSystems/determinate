@@ -46,32 +46,26 @@
         ];
 
         options = {
-          determinate.nix.primaryUser = lib.mkOption {
-            type = lib.types.attrsOf (lib.types.submodule {
-              options = {
-                name = lib.mkOption {
-                  type = lib.types.str;
-                  description = "The Determinate Nix user";
-                };
+          determinate.nix.primaryUser.name = lib.mkOption {
+            type = lib.types.str;
+            description = "The Determinate Nix user";
+          };
 
-                isTrusted = lib.mkOption {
-                  type = lib.types.bool;
-                  description = "Whether the Determinate Nix user is a trusted user";
-                  default = false;
-                };
+          determinate.nix.primaryUser.netrcPath = lib.mkOption {
+            type = lib.types.path;
+            description = "The path to the `netrc` file for the user configured by `primaryUser`";
+            default =
+              let
+                unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser.name;
+                rootLocation = if pkgs.stdenv.isDarwin then "/var/root" else "/root";
+              in
+              if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
+          };
 
-                netrcPath = lib.mkOption {
-                  type = lib.types.path;
-                  description = "The path to the `netrc` file for the user configured by `primaryUser`";
-                  default =
-                    let
-                      unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser.name;
-                      rootLocation = if pkgs.stdenv.isDarwin then "/var/root" else "/root";
-                    in
-                    if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
-                };
-              };
-            });
+          determinate.nix.primaryUser.isTrusted = lib.mkOption {
+            type = lib.types.bool;
+            description = "Whether the Determinate Nix user is a trusted user";
+            default = false;
           };
         };
 
@@ -104,26 +98,20 @@
         ];
 
         options = {
-          determinate.nix.primaryUser = lib.mkOption {
-            type = lib.types.attrsOf (lib.types.submodule {
-              options = {
-                name = lib.mkOption {
-                  type = lib.types.str;
-                  description = "The Determinate Nix user";
-                };
+          determinate.nix.primaryUser.name = lib.mkOption {
+            type = lib.types.str;
+            description = "The Determinate Nix user";
+          };
 
-                netrcPath = lib.mkOption {
-                  type = lib.types.path;
-                  description = "The path to the `netrc` file for the user configured by `primaryUser`";
-                  default =
-                    let
-                      unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser.name;
-                      rootLocation = if pkgs.stdenv.isDarwin then "/var/root" else "/root";
-                    in
-                    if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
-                };
-              };
-            });
+          determinate.nix.primaryUser.netrcPath = lib.mkOption {
+            type = lib.types.path;
+            description = "The path to the `netrc` file for the user configured by `primaryUser`";
+            default =
+              let
+                unprivUserLocation = (if pkgs.stdenv.isDarwin then "/Users/" else "/home/") + config.determinate.nix.primaryUser.name;
+                rootLocation = if pkgs.stdenv.isDarwin then "/var/root" else "/root";
+              in
+              if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
           };
         };
 
@@ -150,26 +138,20 @@
         ];
 
         options = {
-          determinate.nix.primaryUser = lib.mkOption {
-            type = lib.types.attrsOf (lib.types.submodule {
-              options = {
-                name = lib.mkOption {
-                  type = lib.types.str;
-                  description = "The Determinate Nix user";
-                };
+          determinate.nix.primaryUser.name = lib.mkOption {
+            type = lib.types.str;
+            description = "The Determinate Nix user";
+          };
 
-                netrcPath = lib.mkOption {
-                  type = lib.types.path;
-                  description = "The path to the `netrc` file for the user configured by `primaryUser`";
-                  default =
-                    let
-                      unprivUserLocation = "/home/" + config.determinate.nix.primaryUser.name;
-                      rootLocation = "/root";
-                    in
-                    if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
-                };
-              };
-            });
+          determinate.nix.primaryUser.netrcPath = lib.mkOption {
+            type = lib.types.path;
+            description = "The path to the `netrc` file for the user configured by `primaryUser`";
+            default =
+              let
+                unprivUserLocation = "/home/" + config.determinate.nix.primaryUser.name;
+                rootLocation = "/root";
+              in
+              if config.determinate.nix.primaryUser.name == "root" then rootLocation else unprivUserLocation;
           };
         };
 

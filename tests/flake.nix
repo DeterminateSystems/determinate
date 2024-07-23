@@ -49,13 +49,11 @@
     checks.aarch64-darwin.nix-darwin = (nix-darwin.lib.darwinSystem {
       system = "aarch64-darwin";
 
-      modules = [{
-        imports = [
-          determinate.darwinModules.default
-        ];
+      modules = [
+        determinate.darwinModules.default
 
-        determinate.nix.primaryUser.name = "example";
-      }];
+        { determinate.nix.primaryUser.name = "example"; }
+      ];
     }).system;
   };
 }

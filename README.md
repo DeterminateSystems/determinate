@@ -45,7 +45,7 @@ Here's an example [nix-darwin] configuration that uses Determinate's nix-darwin 
         determinate.darwinModules.default
 
         # Set this value somewhere in your own configuration
-        { determinate.nix.primaryUser = "<your-username>"; }
+        { determinate.nix.primaryUser.name = "<your-username>"; }
       ];
     };
   };
