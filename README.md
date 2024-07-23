@@ -91,5 +91,6 @@ Inclusion:
 [flakehub]: https://flakehub.com
 [follows]: https://zero-to-nix.com/concepts/flakes#inputs
 [hm]: https://github.com/nix-community/home-manager
+[nix]: https://zero-to-nix.com/concepts/nix
 [nix-darwin]: https://github.com/LnL7/nix-darwin
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
