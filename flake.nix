@@ -153,7 +153,7 @@
             default =
               let
                 netrcRoot =
-                  if config.determinate.nix.primaryUser == "root"
+                  if config.determinate.nix.primaryUser.username == "root"
                   then "/root"
                   else "/home/${config.determinate.nix.primaryUser.username}";
               in
