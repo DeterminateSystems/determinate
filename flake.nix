@@ -49,6 +49,7 @@
           determinate.nix.primaryUser.username = lib.mkOption {
             type = lib.types.str;
             description = "The Determinate Nix user";
+            default = config.home.username;
           };
 
           determinate.nix.primaryUser.netrcPath = lib.mkOption {
