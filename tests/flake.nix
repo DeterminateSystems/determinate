@@ -23,7 +23,7 @@
             fsType = "ext4";
           };
           boot.loader.grub.devices = [ "/dev/bogus" ];
-          determinate.nix.primaryUser = "example";
+          determinate.nix.primaryUser.name = "example";
         }
       ];
     }).config.system.build.toplevel;
@@ -34,6 +34,11 @@
       modules = [
         determinate.homeManagerModules.default
         {
+          determinate.nix.primaryUser = {
+            name = "example";
+            isTrusted = true;
+          };
+
           home.stateVersion = "23.11";
           home.username = "example";
           home.homeDirectory = "/no-such/directory";
@@ -49,7 +54,7 @@
           determinate.darwinModules.default
         ];
 
-        determinate.nix.primaryUser = "example";
+        determinate.nix.primaryUser.name = "example";
       }];
     }).system;
   };
