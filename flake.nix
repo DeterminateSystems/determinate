@@ -73,13 +73,13 @@
           # they're applied only if `primaryUser.isTrusted` is set to `true`
           nix.settings = lib.mkMerge [
             (lib.optionalAttrs (config.determinate.nix.primaryUser.isTrusted) {
-              netrc-file = config.determinate.nix.primaryUser.netrcPath;
               extra-trusted-public-keys = [
                 "cache.flakehub.com-1:t6986ugxCA+d/ZF9IeMzJkyqi5mDhvFIx7KA/ipulzE="
                 "cache.flakehub.com-2:ntBGiaKSmygJOw2j1hFS7KDlUHQWmZALvSJ9PxMJJYU="
               ];
             })
             {
+              netrc-file = config.determinate.nix.primaryUser.netrcPath;
               extra-substituters = [ "https://cache.flakehub.com" ];
             }
           ];
