@@ -83,9 +83,9 @@
                 "cache.flakehub.com-1:t6986ugxCA+d/ZF9IeMzJkyqi5mDhvFIx7KA/ipulzE="
                 "cache.flakehub.com-2:ntBGiaKSmygJOw2j1hFS7KDlUHQWmZALvSJ9PxMJJYU="
               ];
+              netrc-file = config.determinate.nix.primaryUser.netrcPath;
             })
             {
-              netrc-file = config.determinate.nix.primaryUser.netrcPath;
               extra-substituters = [ "https://cache.flakehub.com" ];
             }
           ];
