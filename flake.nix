@@ -1,5 +1,5 @@
 {
-  description = "";
+  description = "Determinate";
 
   inputs = {
     fh.url = "https://flakehub.com/f/DeterminateSystems/fh/0.1";
