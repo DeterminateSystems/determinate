@@ -54,15 +54,11 @@ Here's an example [nix-darwin] configuration that uses Determinate's nix-darwin 
 
 ## Home Manager
 
-Note: this [Home Manager][hm] module assumes that the Nix daemon is already configured for FlakeHub:
+The Determinate [Home Manager module][hm] functions a bit differently depending on whether the Nix user is [trusted](#trusted-user) or [untrusted](#untrusted-user).
 
-```shell
-netrc-file = /your/home/directory/.local/share/flakehub/netrc
-extra-substituters = https://cache.flakehub.com
-extra-trusted-public-keys = cache.flakehub.com-1:t6986ugxCA+d/ZF9IeMzJkyqi5mDhvFIx7KA/ipulzE= cache.flakehub.com-2:ntBGiaKSmygJOw2j1hFS7KDlUHQWmZALvSJ9PxMJJYU=
-```
+### Trusted user
 
-Inclusion:
+For a trusted user, apply a configuration like this (note the `isTrusted` parameter):
 
 ```nix
 {
@@ -79,6 +75,53 @@ Inclusion:
 
         modules = [
           determinate.homeManagerModules.default
+
+          # Required configuration parameters
+          {
+            determinate.nix.primaryUser.name = "<your-username>";
+            determinate.nix.primaryUser.isTrusted = true;
+          }
+        ];
+      };
+    }
+}
+```
+
+> [!SUCCESS]
+> For trusted users, Nix and [`fh`][fh] are automatically configured to use FlakeHub.
+
+### Untrusted user
+
+For an untrusted user, you need to ensure that the Nix daemon is configured to use [FlakeHub] by applying these settings in your [`nix.conf`][nix-conf] file:
+
+```shell
+netrc-file = /your/home/directory/.local/share/flakehub/netrc
+extra-substituters = https://cache.flakehub.com
+extra-trusted-public-keys = cache.flakehub.com-1:t6986ugxCA+d/ZF9IeMzJkyqi5mDhvFIx7KA/ipulzE= cache.flakehub.com-2:ntBGiaKSmygJOw2j1hFS7KDlUHQWmZALvSJ9PxMJJYU=
+```
+
+Then you can apply a Home Manager configuration along these lines:
+
+```nix
+{
+  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0";
+  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2405.*";
+  inputs.home-manager.url = "https://flakehub.com/f/nix-community/home-manager/0.2405.*";
+
+  outputs = { nix, nixpkgs, home-manager, ... }:
+    let
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+    in {
+      homeConfigurations.my-workstation = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+
+        modules = [
+          determinate.homeManagerModules.default
+
+          # Required configuration parameters
+          {
+            determinate.nix.primaryUser.name = "<your-username>";
+          }
         ];
       };
     }
@@ -91,5 +134,6 @@ Inclusion:
 [flakehub]: https://flakehub.com
 [follows]: https://zero-to-nix.com/concepts/flakes#inputs
 [hm]: https://github.com/nix-community/home-manager
+[nix-conf]: https://nix.dev/manual/nix/latest/command-ref/conf-file
 [nix-darwin]: https://github.com/LnL7/nix-darwin
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
