@@ -24,6 +24,7 @@
           };
           boot.loader.grub.devices = [ "/dev/bogus" ];
           determinate.nix.primaryUser.username = "example";
+          system.stateVersion = "24.05";
         }
       ];
     }).config.system.build.toplevel;
@@ -39,7 +40,7 @@
             isTrusted = true;
           };
 
-          home.stateVersion = "23.11";
+          home.stateVersion = "24.05";
           home.username = "example";
           home.homeDirectory = "/no-such/directory";
         }
