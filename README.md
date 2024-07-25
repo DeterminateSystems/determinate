@@ -102,7 +102,7 @@ For a trusted user, apply a configuration like this (note the `isTrusted` parame
 
         modules = [
           # Load the Determinate module
-          determinate.homeManagerModules.default
+          determinate.homeModules.default
 
           {
             # Required if a trusted user
@@ -147,7 +147,7 @@ Then you can apply a Home Manager configuration along these lines:
 
         modules = [
           # Load the Determinate module
-          determinate.homeManagerModules.default
+          determinate.homeModules.default
 
           {
             # Optional; defaults to `home.username` in Home Manager
