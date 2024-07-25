@@ -23,7 +23,7 @@
             fsType = "ext4";
           };
           boot.loader.grub.devices = [ "/dev/bogus" ];
-          determinate.nix.primaryUser = "example";
+          determinate.nix.primaryUser.username = "example";
         }
       ];
     }).config.system.build.toplevel;
@@ -34,6 +34,11 @@
       modules = [
         determinate.homeManagerModules.default
         {
+          determinate.nix.primaryUser = {
+            username = "example";
+            isTrusted = true;
+          };
+
           home.stateVersion = "23.11";
           home.username = "example";
           home.homeDirectory = "/no-such/directory";
@@ -44,13 +49,11 @@
     checks.aarch64-darwin.nix-darwin = (nix-darwin.lib.darwinSystem {
       system = "aarch64-darwin";
 
-      modules = [{
-        imports = [
-          determinate.darwinModules.default
-        ];
+      modules = [
+        determinate.darwinModules.default
 
-        determinate.nix.primaryUser = "example";
-      }];
+        { determinate.nix.primaryUser.username = "example"; }
+      ];
     }).system;
   };
 }
