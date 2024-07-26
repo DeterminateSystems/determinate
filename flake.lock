@@ -1,5 +1,41 @@
 {
   "nodes": {
+    "determinate-nixd-aarch64-darwin": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-PSst4If/f59juPweAN8N3SiPkPYpMoe3MvBRxg5RnUM=",
+        "type": "file",
+        "url": "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/aarch64-darwin"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/aarch64-darwin"
+      }
+    },
+    "determinate-nixd-aarch64-linux": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-BKZOVRi+ljKKGa6dJBaPErirYmlm85bFsjtm9yhS6gY=",
+        "type": "file",
+        "url": "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/aarch64-linux"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/aarch64-linux"
+      }
+    },
+    "determinate-nixd-x86_64-linux": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-+o+scg8HdCUKX2bUVN5gvhITDq7qczBzgEvgFr8jcqQ=",
+        "type": "file",
+        "url": "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/x86_64-linux"
+      },
+      "original": {
+        "type": "file",
+        "url": "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/x86_64-linux"
+      }
+    },
     "fenix": {
       "inputs": {
         "nixpkgs": [
@@ -294,6 +330,9 @@
     },
     "root": {
       "inputs": {
+        "determinate-nixd-aarch64-darwin": "determinate-nixd-aarch64-darwin",
+        "determinate-nixd-aarch64-linux": "determinate-nixd-aarch64-linux",
+        "determinate-nixd-x86_64-linux": "determinate-nixd-x86_64-linux",
         "fh": "fh",
         "nix": "nix",
         "nixpkgs": [

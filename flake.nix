@@ -5,6 +5,19 @@
     fh.url = "https://flakehub.com/f/DeterminateSystems/fh/0.1";
     nix.url = "https://flakehub.com/f/DeterminateSystems/nix/2.0";
     nixpkgs.follows = "fh/nixpkgs";
+
+    determinate-nixd-aarch64-linux = {
+      url = "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/aarch64-linux";
+      flake = false;
+    };
+    determinate-nixd-x86_64-linux = {
+      url = "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/x86_64-linux";
+      flake = false;
+    };
+    determinate-nixd-aarch64-darwin = {
+      url = "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/aarch64-darwin";
+      flake = false;
+    };
   };
 
   outputs = { self, nixpkgs, ... } @ inputs:
@@ -28,7 +41,14 @@
       });
     in
     {
-      packages = forAllSystems ({ system, pkgs, ... }: { });
+      packages = forAllSystems ({ system, pkgs, ... }: {
+        default = pkgs.runCommand "determinate-nixd" { } ''
+          mkdir -p $out/bin
+          cp ${inputs."determinate-nixd-${system}"} $out/bin/determinate-nixd
+          chmod +x $out/bin/determinate-nixd
+          $out/bin/determinate-nixd --help
+        '';
+      });
 
       devShells = forAllSystems ({ system, pkgs, ... }:
         {
@@ -152,6 +172,12 @@
             };
           };
 
+          launchd.daemons.nix-daemon.serviceConfig.ProgramArguments = [
+            "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
+            "--nix-bin"
+            "${config.nix.package}/bin"
+          ];
+
           nix.settings = {
             always-allow-substitutes = true;
             bash-prompt-prefix = "(nix:$name)\\040";
@@ -209,6 +235,11 @@
               url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.0.tar.gz";
             };
           };
+
+          systemd.services.nix-daemon.serviceConfig.ExecStart = [
+            ""
+            "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin"
+          ];
 
           nix.settings = {
             always-allow-substitutes = true;
