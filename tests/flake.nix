@@ -33,7 +33,7 @@
       pkgs = nixpkgs.legacyPackages.aarch64-darwin;
 
       modules = [
-        determinate.homeManagerModules.default
+        determinate.homeModules.default
         {
           determinate.nix.primaryUser = {
             username = "example";

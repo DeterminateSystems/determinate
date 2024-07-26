@@ -40,7 +40,7 @@
           };
         });
 
-      homeManagerModules.default = { lib, config, pkgs, ... }: {
+      homeModules.default = { lib, config, pkgs, ... }: {
         imports = [
           inputs.nix.homeManagerModules.default
         ];
