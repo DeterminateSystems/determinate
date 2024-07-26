@@ -9,7 +9,6 @@ To add it to a [flake][flakes]:
 }
 ```
 
-> [!WARNING]
 > We recommend not using a [`follows`][follows] directive for [Nixpkgs] (`inputs.nixpkgs.follows = "nixpkgs"`) in conjunction with the Determinate flake, as it leads to cache misses for artifacts otherwise available from [FlakeHub Cache][cache].
 
 ## NixOS
@@ -117,7 +116,6 @@ For a trusted user, apply a configuration like this (note the `isTrusted` parame
 }
 ```
 
-> [!SUCCESS]
 > For trusted users, Nix and [`fh`][fh] are automatically configured to use FlakeHub.
 
 ### Untrusted user
