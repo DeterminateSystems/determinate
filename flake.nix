@@ -71,6 +71,7 @@
         config = {
           home.packages = [
             inputs.fh.packages."${pkgs.stdenv.system}".default
+            config.nix.package
           ];
 
           nix.package = inputs.nix.packages."${pkgs.stdenv.system}".default;
