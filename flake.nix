@@ -110,10 +110,6 @@
       };
 
       darwinModules.default = { lib, config, pkgs, ... }: {
-        imports = [
-          inputs.nix.darwinModules.default
-        ];
-
         options = {
           determinate.nix.primaryUser.username = lib.mkOption {
             type = lib.types.str;
@@ -139,13 +135,34 @@
             inputs.fh.packages."${pkgs.stdenv.system}".default
           ];
 
+          services.nix-daemon.enable = true;
+
+          nix.package = inputs.nix.packages."${pkgs.stdenv.system}".default;
+
+          nix.registry.nixpkgs = {
+            exact = true;
+            from = {
+              type = "indirect";
+              id = "nixpkgs";
+            };
+            to = {
+              type = "tarball";
+              url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.0.tar.gz";
+            };
+          };
+
           nix.settings = {
-            netrc-file = config.determinate.nix.primaryUser.netrcPath;
+            always-allow-substitutes = true;
+            bash-prompt-prefix = "(nix:$name)\\040";
+            experimental-features = [ "nix-command" "flakes" ];
+            extra-nix-path = [ "nixpkgs=flake:nixpkgs" ];
             extra-substituters = [ "https://cache.flakehub.com" ];
             extra-trusted-public-keys = [
               "cache.flakehub.com-1:t6986ugxCA+d/ZF9IeMzJkyqi5mDhvFIx7KA/ipulzE="
               "cache.flakehub.com-2:ntBGiaKSmygJOw2j1hFS7KDlUHQWmZALvSJ9PxMJJYU="
             ];
+            netrc-file = config.determinate.nix.primaryUser.netrcPath;
+            upgrade-nix-store-path-url = "https://install.determinate.systems/nix-upgrade/stable/universal";
           };
         };
       };
