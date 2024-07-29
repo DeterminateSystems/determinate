@@ -256,20 +256,6 @@
         "url": "https://flakehub.com/f/NixOS/nixpkgs/%2A"
       }
     },
-    "nixpkgs_4": {
-      "locked": {
-        "lastModified": 1721622093,
-        "narHash": "sha256-iQ+quy3A1EKeFyLyAtjhgSvZHH7r+xybXZkxMhasN4I=",
-        "rev": "453402b94f39f968a7c27df28e060f69e4a50c3b",
-        "revCount": 656183,
-        "type": "tarball",
-        "url": "https://api.flakehub.com/f/pinned/DeterminateSystems/nixpkgs-weekly/0.1.656183%2Brev-453402b94f39f968a7c27df28e060f69e4a50c3b/0190de15-ee7f-76e1-9ccc-7f56ca487a22/source.tar.gz"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-compat": [
@@ -310,7 +296,10 @@
       "inputs": {
         "fh": "fh",
         "nix": "nix",
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": [
+          "fh",
+          "nixpkgs"
+        ]
       }
     },
     "rust-analyzer-src": {
