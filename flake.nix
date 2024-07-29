@@ -4,6 +4,7 @@
   inputs = {
     fh.url = "https://flakehub.com/f/DeterminateSystems/fh/0.1";
     nix.url = "https://flakehub.com/f/DeterminateSystems/nix/2.0";
+    nixpkgs.follows = "fh/nixpkgs";
   };
 
   outputs = { self, nixpkgs, ... } @ inputs:
