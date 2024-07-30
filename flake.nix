@@ -7,15 +7,15 @@
     nixpkgs.follows = "fh/nixpkgs";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/2cf41354c317628754d1c0c4dd4adbeaab0ac8be/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/2cf41354c317628754d1c0c4dd4adbeaab0ac8be/x86_64-linux";
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/87e416024f6e7203748aebc25862ddf17efb428e/aarch64-darwin";
+      url = "https://install.determinate.systems/determinate-nixd/rev/2cf41354c317628754d1c0c4dd4adbeaab0ac8be/aarch64-darwin";
       flake = false;
     };
   };
