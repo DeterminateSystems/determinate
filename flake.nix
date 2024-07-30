@@ -69,18 +69,6 @@
             default = config.home.username;
           };
 
-          determinate.nix.primaryUser.netrcPath = lib.mkOption {
-            type = lib.types.path;
-            description = "The path to the `netrc` file for the user configured by `primaryUser`";
-            default =
-              let
-                unprivUserLocation = "${if pkgs.stdenv.isDarwin then "/Users" else "/home"}/${config.determinate.nix.primaryUser.username}";
-                rootLocation = if pkgs.stdenv.isDarwin then "/var/root" else "/root";
-                netrcRoot = if config.determinate.nix.primaryUser.username == "root" then rootLocation else unprivUserLocation;
-              in
-              "${netrcRoot}/.local/share/flakehub/netrc";
-          };
-
           determinate.nix.primaryUser.isTrusted = lib.mkOption {
             type = lib.types.bool;
             description = "Whether the Determinate Nix user is a trusted user";
@@ -95,7 +83,6 @@
 
           nix.package = inputs.nix.packages."${pkgs.stdenv.system}".default;
 
-
           nix.registry.nixpkgs = {
             exact = true;
             from = {
@@ -108,7 +95,7 @@
             };
           };
 
-          # The `netrc-file` and `extra-trusted-public-keys` settings are privileged and so
+          # The `extra-trusted-public-keys` settings are privileged and so
           # they're applied only if `primaryUser.isTrusted` is set to `true`
           nix.settings = lib.mkMerge [
             (lib.optionalAttrs (config.determinate.nix.primaryUser.isTrusted) {
@@ -117,7 +104,7 @@
                 "cache.flakehub.com-1:t6986ugxCA+d/ZF9IeMzJkyqi5mDhvFIx7KA/ipulzE="
                 "cache.flakehub.com-2:ntBGiaKSmygJOw2j1hFS7KDlUHQWmZALvSJ9PxMJJYU="
               ];
-              netrc-file = config.determinate.nix.primaryUser.netrcPath;
+              netrc-file = "/nix/var/determinate/netrc";
               upgrade-nix-store-path-url = "https://install.determinate.systems/nix-upgrade/stable/universal";
             })
             {
@@ -131,26 +118,6 @@
       };
 
       darwinModules.default = { lib, config, pkgs, ... }: {
-        options = {
-          determinate.nix.primaryUser.username = lib.mkOption {
-            type = lib.types.str;
-            description = "The Determinate Nix user";
-          };
-
-          determinate.nix.primaryUser.netrcPath = lib.mkOption {
-            type = lib.types.path;
-            description = "The path to the `netrc` file for the user configured by `primaryUser`";
-            default =
-              let
-                netrcRoot =
-                  if config.determinate.nix.primaryUser.username == "root"
-                  then "/var/root"
-                  else "/Users/${config.determinate.nix.primaryUser.username}";
-              in
-              "${netrcRoot}/.local/share/flakehub/netrc";
-          };
-        };
-
         config = {
           environment.systemPackages = [
             inputs.fh.packages."${pkgs.stdenv.system}".default
@@ -188,7 +155,7 @@
               "cache.flakehub.com-1:t6986ugxCA+d/ZF9IeMzJkyqi5mDhvFIx7KA/ipulzE="
               "cache.flakehub.com-2:ntBGiaKSmygJOw2j1hFS7KDlUHQWmZALvSJ9PxMJJYU="
             ];
-            netrc-file = config.determinate.nix.primaryUser.netrcPath;
+            netrc-file = "/nix/var/determinate/netrc";
             upgrade-nix-store-path-url = "https://install.determinate.systems/nix-upgrade/stable/universal";
           };
         };
@@ -196,27 +163,6 @@
 
 
       nixosModules.default = { lib, pkgs, config, ... }: {
-        options = {
-          determinate.nix.primaryUser.username = lib.mkOption {
-            type = lib.types.str;
-            description = "The Determinate Nix user";
-          };
-
-          determinate.nix.primaryUser.netrcPath = lib.mkOption {
-            type = lib.types.path;
-            description = "The path to the `netrc` file for the user configured by `primaryUser`";
-
-            default =
-              let
-                netrcRoot =
-                  if config.determinate.nix.primaryUser.username == "root"
-                  then "/root"
-                  else "/home/${config.determinate.nix.primaryUser.username}";
-              in
-              "${netrcRoot}/.local/share/flakehub/netrc";
-          };
-        };
-
         config = {
           environment.systemPackages = [
             inputs.fh.packages."${pkgs.stdenv.system}".default
@@ -251,7 +197,7 @@
               "cache.flakehub.com-1:t6986ugxCA+d/ZF9IeMzJkyqi5mDhvFIx7KA/ipulzE="
               "cache.flakehub.com-2:ntBGiaKSmygJOw2j1hFS7KDlUHQWmZALvSJ9PxMJJYU="
             ];
-            netrc-file = config.determinate.nix.primaryUser.netrcPath;
+            netrc-file = "/nix/var/determinate/netrc";
             upgrade-nix-store-path-url = "https://install.determinate.systems/nix-upgrade/stable/universal";
           };
         };
