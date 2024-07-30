@@ -23,7 +23,6 @@
             fsType = "ext4";
           };
           boot.loader.grub.devices = [ "/dev/bogus" ];
-          determinate.nix.primaryUser.username = "example";
           system.stateVersion = "24.05";
         }
       ];
@@ -52,8 +51,6 @@
 
       modules = [
         determinate.darwinModules.default
-
-        { determinate.nix.primaryUser.username = "example"; }
       ];
     }).system;
   };
