@@ -36,6 +36,9 @@ Here's an example configuration:
 
 ## nix-darwin
 
+> The [nix-darwin] and [Home Manager][hm] modules for Determinate are not compatible with one another.
+> If you're using the nix-darwin module, we recommend not using the Home Manager module on top of it.
+
 You can quickly set up Determinate on macOS using the [nix-darwin] module.
 
 Here's an example configuration:
