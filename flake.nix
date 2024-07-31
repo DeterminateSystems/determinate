@@ -39,6 +39,10 @@
         inherit system;
         pkgs = pkgsFor system;
       });
+
+      # Stronger than mkDefault (1000), weaker than mkForce (50) and the "default override priority"
+      # (100).
+      mkPreferable = inputs.nixpkgs.lib.mkOrder 750;
     in
     {
       packages = forAllSystems ({ system, pkgs, ... }: {
@@ -86,14 +90,18 @@
 
           nix.registry.nixpkgs = {
             exact = true;
+
             from = {
               type = "indirect";
               id = "nixpkgs";
             };
-            to = {
+
+            # NOTE(cole-h): The NixOS module exposes a `flake` option that is a fancy wrapper around
+            # setting `to` -- we don't want to clobber this if users have set it on their own
+            to = lib.mkIf (config.nix.registry.nixpkgs.flake or null == null) (mkPreferable {
               type = "tarball";
               url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.0.tar.gz";
-            };
+            });
           };
 
           # The `extra-trusted-public-keys` settings are privileged and so
@@ -130,14 +138,18 @@
 
           nix.registry.nixpkgs = {
             exact = true;
+
             from = {
               type = "indirect";
               id = "nixpkgs";
             };
-            to = {
+
+            # NOTE(cole-h): The NixOS module exposes a `flake` option that is a fancy wrapper around
+            # setting `to` -- we don't want to clobber this if users have set it on their own
+            to = lib.mkIf (config.nix.registry.nixpkgs.flake or null == null) (mkPreferable {
               type = "tarball";
               url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.0.tar.gz";
-            };
+            });
           };
 
           launchd.daemons.nix-daemon.serviceConfig.ProgramArguments = [
@@ -173,14 +185,18 @@
 
           nix.registry.nixpkgs = {
             exact = true;
+
             from = {
               type = "indirect";
               id = "nixpkgs";
             };
-            to = {
+
+            # NOTE(cole-h): The NixOS module exposes a `flake` option that is a fancy wrapper around
+            # setting `to` -- we don't want to clobber this if users have set it on their own
+            to = lib.mkIf (config.nix.registry.nixpkgs.flake or null == null) (mkPreferable {
               type = "tarball";
               url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.0.tar.gz";
-            };
+            });
           };
 
           systemd.services.nix-daemon.serviceConfig.ExecStart = [
