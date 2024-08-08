@@ -34,7 +34,7 @@
         };
       };
 
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
 
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         inherit system;
