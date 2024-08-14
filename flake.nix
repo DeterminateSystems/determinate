@@ -248,6 +248,7 @@
             };
 
             socketConfig = {
+              Service = "nix-daemon.service";
               FileDescriptorName = "determinate-nixd.socket";
               ListenStream = "/nix/var/determinate/determinate-nixd.socket";
             };
