@@ -7,15 +7,15 @@
     nixpkgs.follows = "fh/nixpkgs";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/d43df18ebee8d7f8bb7a89a7f1b973d579f8087b/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/06fe26d67808f9d29585f3255917b1438ce14aca/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/d43df18ebee8d7f8bb7a89a7f1b973d579f8087b/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/06fe26d67808f9d29585f3255917b1438ce14aca/x86_64-linux";
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/d43df18ebee8d7f8bb7a89a7f1b973d579f8087b/macOS";
+      url = "https://install.determinate.systems/determinate-nixd/rev/06fe26d67808f9d29585f3255917b1438ce14aca/macOS";
       flake = false;
     };
     determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
@@ -159,11 +159,33 @@
             });
           };
 
-          launchd.daemons.nix-daemon.serviceConfig.ProgramArguments = [
-            "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
-            "--nix-bin"
-            "${config.nix.package}/bin"
-          ];
+          launchd.daemons.nix-daemon.serviceConfig = {
+            StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
+            StandardOutPath = lib.mkForce "/var/log/determinate-nixd.log";
+
+            ProgramArguments = lib.mkForce [
+              "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
+              "--nix-bin"
+              "${config.nix.package}/bin"
+            ];
+
+            Sockets = {
+              "determinate-nixd.socket" = {
+                # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
+                SockPassive = true;
+                SockPathName = "/var/run/determinate-nixd.socket";
+              };
+
+              "nix-daemon.socket" = {
+                # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
+                SockPassive = true;
+                SockPathName = "/var/run/nix-daemon.socket";
+              };
+            };
+
+            SoftResourceLimits.NumberOfFiles = 1048576;
+            HardResourceLimits.NumberOfFiles = 2097152;
+          };
 
           nix.settings = {
             always-allow-substitutes = true;
@@ -216,6 +238,24 @@
             ""
             "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin"
           ];
+
+          systemd.sockets.nix-daemon.socketConfig.FileDescriptorName = "nix-daemon.socket";
+          systemd.sockets.determinate-nixd = {
+            description = "Determinate Nixd Daemon Socket";
+            wantedBy = [ "sockets.target" ];
+            before= [ "multi-user.target" ];
+
+            unitConfig = {
+              RequiresMountsFor = [ "/nix/store" "/nix/var/determinate" ];
+              ConditionPathIsReadWrite = [ "/nix/var/determinate" ];
+            };
+
+            socketConfig = {
+              Service = "nix-daemon.service";
+              FileDescriptorName = "determinate-nixd.socket";
+              ListenStream = "/nix/var/determinate/determinate-nixd.socket";
+            };
+          };
 
           nix.settings = {
             always-allow-substitutes = true;
