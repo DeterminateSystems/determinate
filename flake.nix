@@ -160,7 +160,7 @@
           };
 
           launchd.daemons.nix-daemon.serviceConfig = {
-            ProgramArguments = [
+            ProgramArguments = lib.mkForce [
               "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
               "--nix-bin"
               "${config.nix.package}/bin"
