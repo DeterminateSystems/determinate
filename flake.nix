@@ -187,6 +187,46 @@
             HardResourceLimits.NumberOfFiles = 2097152;
           };
 
+          system.activationScripts.dnixd-store = {
+            enable = true;
+            text = ''
+              if [ -e /Library/LaunchDaemons/org.nixos.darwin-store.plist ]; then
+                if [ ! -e /Library/LaunchDaemons/org.nixos.darwin-store.plist.backup-before-dnixd ]; then
+                  mv /Library/LaunchDaemons/org.nixos.darwin-store.plist /Library/LaunchDaemons/org.nixos.darwin-store.plist.backup-before-dnixd
+                else
+                  printf >&2 "Both /Library/LaunchDaemons/org.nixos.darwin-store.plist and "
+                  printf >&2 "/Library/LaunchDaemons/org.nixos.darwin-store.plist.backup-before-dnixd exist\n"
+                  printf >&2 "Please check there is nothing important in these files, "
+                  printf >&2 "and then delete either or both files before trying again.\n"
+                  exit 2
+                fi
+              fi
+
+              cat > /Library/LaunchDaemons/systems.determinate.nix-store.plist <<EOF
+              <?xml version="1.0" encoding="UTF-8"?>
+              <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+              <plist version="1.0">
+              <dict>
+                      <key>RunAtLoad</key>
+                      <true/>
+                      <key>Label</key>
+                      <string>systems.determinate.nix-store</string>
+                      <key>ProgramArguments</key>
+                      <array>
+                              <string>/usr/local/bin/determinate-nixd</string>
+                              <string>--stop-after</string>
+                              <string>mount</string>
+                      </array>
+                      <key>StandardErrorPath</key>
+                      <string>/var/log/determinate-nixd-mount.log</string>
+                      <key>StandardOutPath</key>
+                      <string>/var/log/determinate-nixd-mount.log</string>
+              </dict>
+              </plist>
+              EOF
+            '';
+          };
+
           nix.settings = {
             always-allow-substitutes = true;
             bash-prompt-prefix = "(nix:$name)\\040";
