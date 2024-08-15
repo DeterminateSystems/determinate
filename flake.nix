@@ -160,6 +160,9 @@
           };
 
           launchd.daemons.nix-daemon.serviceConfig = {
+            StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
+            StandardOutPath = lib.mkForce "/var/log/determinate-nixd.log";
+
             ProgramArguments = lib.mkForce [
               "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
               "--nix-bin"
