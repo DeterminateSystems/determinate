@@ -34,6 +34,11 @@ jobs:
           rm -f flake.lock
           nix flake lock
           nix flake check
+      - run: |
+          set -eux
+
+          nix flake lock
+          git diff --exit-code
 
   publish:
     needs: [test-modules]
