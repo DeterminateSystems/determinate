@@ -170,13 +170,13 @@
               "determinate-nixd.socket" = {
                 # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
                 SockPassive = true;
-                SockPathName = "/nix/var/determinate/determinate-nixd.socket";
+                SockPathName = "/var/run/determinate-nixd.socket";
               };
 
               "nix-daemon.socket" = {
                 # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
                 SockPassive = true;
-                SockPathName = "/nix/var/nix/daemon-socket/socket";
+                SockPathName = "/var/run/nix-daemon.socket";
               };
             };
 
