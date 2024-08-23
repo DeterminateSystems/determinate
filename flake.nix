@@ -2,20 +2,19 @@
   description = "Determinate";
 
   inputs = {
-    fh.url = "https://flakehub.com/f/DeterminateSystems/fh/0.1";
     nix.url = "https://flakehub.com/f/DeterminateSystems/nix/2.0";
-    nixpkgs.follows = "fh/nixpkgs";
+    nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.tar.gz";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/06fe26d67808f9d29585f3255917b1438ce14aca/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/21cb4d451a3d3a9ea72fb5a25c691eb4438d210a/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/06fe26d67808f9d29585f3255917b1438ce14aca/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/21cb4d451a3d3a9ea72fb5a25c691eb4438d210a/x86_64-linux";
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/06fe26d67808f9d29585f3255917b1438ce14aca/macOS";
+      url = "https://install.determinate.systems/determinate-nixd/rev/21cb4d451a3d3a9ea72fb5a25c691eb4438d210a/macOS";
       flake = false;
     };
     determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
@@ -145,7 +144,6 @@
 
         config = {
           home.packages = [
-            inputs.fh.packages."${pkgs.stdenv.system}".default
             config.nix.package
           ];
 
@@ -160,10 +158,6 @@
         ];
 
         config = {
-          environment.systemPackages = [
-            inputs.fh.packages."${pkgs.stdenv.system}".default
-          ];
-
           services.nix-daemon.enable = true;
           launchd.daemons.nix-daemon.serviceConfig = {
             StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
@@ -204,10 +198,6 @@
         ];
 
         config = {
-          environment.systemPackages = [
-            inputs.fh.packages."${pkgs.stdenv.system}".default
-          ];
-
           systemd.services.nix-daemon.serviceConfig.ExecStart = [
             ""
             "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin"
