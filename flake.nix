@@ -44,7 +44,7 @@
       # (100).
       mkPreferable = inputs.nixpkgs.lib.mkOrder 750;
 
-      # Common settings that are shared between NixOS, home-manager, and nix-darwin modules.
+      # Common settings that are shared between NixOS and nix-darwin modules.
       # The settings configured in this module must be generally settable by users both trusted and
       # untrusted by the Nix daemon. Settings that require being a trusted user belong in the
       # `restrictedSettingsModule` below.
@@ -75,17 +75,13 @@
         };
       };
 
-      # Restricted settings that are shared between NixOS and nix-darwin modules. This is
-      # specifically not used in the home-manager module because otherwise it would cause infinite
-      # recursion (because of some interaction with `lib.optionals` and this module).
+      # Restricted settings that are shared between NixOS and nix-darwin modules.
       # The settings configured in this module require being a user trusted by the Nix daemon.
       restrictedSettingsModule = { ... }: {
         nix.settings = restrictedNixSettings;
       };
 
       # Nix settings that require being a trusted user to configure.
-      # NOTE(cole-h): we can't merge this with the `restrictedSettingsModule` above without causing
-      # infinite recursion in the home-manager module.
       restrictedNixSettings = {
         always-allow-substitutes = true;
         netrc-file = "/nix/var/determinate/netrc";
@@ -122,34 +118,6 @@
             ];
           };
         });
-
-      homeModules.default = { lib, config, pkgs, ... }: {
-        options = {
-          determinate.nix.primaryUser.username = lib.mkOption {
-            type = lib.types.str;
-            description = "The Determinate Nix user";
-            default = config.home.username;
-          };
-
-          determinate.nix.primaryUser.isTrusted = lib.mkOption {
-            type = lib.types.bool;
-            description = "Whether the Determinate Nix user is a trusted user";
-            default = config.determinate.nix.primaryUser.username == "root";
-          };
-        };
-
-        imports = [
-          commonSettingsModule
-        ];
-
-        config = {
-          home.packages = [
-            config.nix.package
-          ];
-
-          nix.settings = lib.optionalAttrs config.determinate.nix.primaryUser.isTrusted restrictedNixSettings;
-        };
-      };
 
       darwinModules.default = { lib, config, pkgs, ... }: {
         imports = [
@@ -198,6 +166,10 @@
         ];
 
         config = {
+          environment.systemPackages =[
+            self.packages.${pkgs.stdenv.system}.default
+          ];
+
           systemd.services.nix-daemon.serviceConfig.ExecStart = [
             ""
             "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin"

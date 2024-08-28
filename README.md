@@ -36,9 +36,6 @@ Here's an example configuration:
 
 ## nix-darwin
 
-> The [nix-darwin] and [Home Manager][hm] modules for Determinate are not compatible with one another.
-> If you're using the nix-darwin module, we recommend not using the Home Manager module on top of it.
-
 You can quickly set up Determinate on macOS using the [nix-darwin] module.
 
 Here's an example configuration:
@@ -60,99 +57,15 @@ Here's an example configuration:
 }
 ```
 
-## Home Manager
-
-You can quickly set up Determinate on Linux or macOS using the [Home Manager][hm] module.
-These options are available:
-
-| Parameter                               | Description                                        | Default                                                                        |
-| :-------------------------------------- | :------------------------------------------------- | :----------------------------------------------------------------------------- |
-| `determinate.nix.primaryUser.username`  | The Determinate Nix user                           | The [`home.username`][hm-username] parameter in the Home Manager configuration |
-| `determinate.nix.primaryUser.isTrusted` | Whether the Determinate Nix user is a trusted user | Whether `determinate.nix.primaryUser.username` equals `"root"`                 |
-
-The Determinate [Home Manager module][hm] functions a bit differently depending on whether the Nix user is [trusted](#trusted-user) or [untrusted](#untrusted-user).
-
-### Trusted user
-
-For a trusted user, apply a configuration like this (note the `isTrusted` parameter):
-
-```nix
-{
-  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
-  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2405.*";
-  inputs.home-manager.url = "https://flakehub.com/f/nix-community/home-manager/0.2405.*";
-
-  outputs = { nix, nixpkgs, home-manager, ... }:
-    let
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
-    in {
-      homeConfigurations.my-workstation = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-
-        modules = [
-          # Load the Determinate module
-          determinate.homeModules.default
-
-          {
-            # Required if a trusted user
-            determinate.nix.primaryUser.isTrusted = true;
-
-            # Optional; defaults to `home.username` in Home Manager
-            determinate.nix.primaryUser.username = "<your-username>";
-          }
-        ];
-      };
-    };
-}
-```
-
-> For trusted users, Nix and [`fh`][fh] are automatically configured to use FlakeHub.
-
-### Untrusted user
-
-For an untrusted user, you need to ensure that the Nix daemon is configured to use [FlakeHub] by applying these settings in your [`nix.conf`][nix-conf] file:
-
-```shell
-netrc-file = /nix/var/determinate/netrc
-extra-substituters = https://cache.flakehub.com
-extra-trusted-public-keys = cache.flakehub.com-3:hJuILl5sVK4iKm86JzgdXW12Y2Hwd5G07qKtHTOcDCM= cache.flakehub.com-4:Asi8qIv291s0aYLyH6IOnr5Kf6+OF14WVjkE6t3xMio= cache.flakehub.com-5:zB96CRlL7tiPtzA9/WKyPkp3A2vqxqgdgyTVNGShPDU= cache.flakehub.com-6:W4EGFwAGgBj3he7c5fNh9NkOXw0PUVaxygCVKeuvaqU= cache.flakehub.com-7:mvxJ2DZVHn/kRxlIaxYNMuDG1OvMckZu32um1TadOR8= cache.flakehub.com-8:moO+OVS0mnTjBTcOUh2kYLQEd59ExzyoW1QgQ8XAARQ= cache.flakehub.com-9:wChaSeTI6TeCuV/Sg2513ZIM9i0qJaYsF+lZCXg0J6o= cache.flakehub.com-10:2GqeNlIp6AKp4EF2MVbE1kBOp9iBSyo0UPR9KoR0o1Y=
-```
-
-Then you can apply a Home Manager configuration along these lines:
-
-```nix
-{
-  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
-  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2405.*";
-  inputs.home-manager.url = "https://flakehub.com/f/nix-community/home-manager/0.2405.*";
-
-  outputs = { nix, nixpkgs, home-manager, ... }:
-    let
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
-    in {
-      homeConfigurations.my-workstation = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-
-        modules = [
-          # Load the Determinate module
-          determinate.homeModules.default
-        ];
-      };
-    };
-}
-```
-
 [cache]: https://determinate.systems/posts/flakehub-cache-beta
 [detsys]: https://determinate.systems
 [fh]: https://github.com/DeterminateSystems/fh
 [flakehub]: https://flakehub.com
 [flakes]: https://zero-to-nix.com/concepts/flakes
 [follows]: https://zero-to-nix.com/concepts/flakes#inputs
-[hm]: https://github.com/nix-community/home-manager
 [netrc]: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 [nix]: https://zero-to-nix.com/concepts/nix
 [nix-conf]: https://nix.dev/manual/nix/latest/command-ref/conf-file
 [nix-darwin]: https://github.com/LnL7/nix-darwin
 [nixos]: https://zero-to-nix.com/concepts/nixos
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
-[hm-username]: https://nix-community.github.io/home-manager/options.xhtml#opt-home.username

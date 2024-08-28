@@ -28,24 +28,6 @@
       ];
     }).config.system.build.toplevel;
 
-    checks.aarch64-darwin.home-manager = (home-manager.lib.homeManagerConfiguration {
-      pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-
-      modules = [
-        determinate.homeModules.default
-        {
-          determinate.nix.primaryUser = {
-            username = "example";
-            isTrusted = true;
-          };
-
-          home.stateVersion = "24.05";
-          home.username = "example";
-          home.homeDirectory = "/no-such/directory";
-        }
-      ];
-    }).activation-script;
-
     checks.aarch64-darwin.nix-darwin = (nix-darwin.lib.darwinSystem {
       system = "aarch64-darwin";
 
