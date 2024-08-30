@@ -6,15 +6,15 @@
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.tar.gz";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/21cb4d451a3d3a9ea72fb5a25c691eb4438d210a/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/fb88a079cf330e8dfe20f4426a36ee663d7bb47e/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/21cb4d451a3d3a9ea72fb5a25c691eb4438d210a/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/fb88a079cf330e8dfe20f4426a36ee663d7bb47e/x86_64-linux";
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/21cb4d451a3d3a9ea72fb5a25c691eb4438d210a/macOS";
+      url = "https://install.determinate.systems/determinate-nixd/rev/fb88a079cf330e8dfe20f4426a36ee663d7bb47e/macOS";
       flake = false;
     };
     determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
@@ -42,7 +42,10 @@
 
       # Stronger than mkDefault (1000), weaker than mkForce (50) and the "default override priority"
       # (100).
-      mkPreferable = inputs.nixpkgs.lib.mkOrder 750;
+      mkPreferable = inputs.nixpkgs.lib.mkOverride 750;
+
+      # Stronger than the "default override priority", as the upstream module uses that, and weaker than mkForce (50).
+      mkMorePreferable = inputs.nixpkgs.lib.mkOverride 75;
 
       # Common settings that are shared between NixOS and nix-darwin modules.
       # The settings configured in this module must be generally settable by users both trusted and
@@ -151,8 +154,16 @@
               };
             };
 
-            SoftResourceLimits.NumberOfFiles = 1048576;
-            HardResourceLimits.NumberOfFiles = 2097152;
+            SoftResourceLimits = {
+              NumberOfFiles = mkPreferable 1048576;
+              NumberOfProcesses = mkPreferable 1048576;
+              Stack = mkPreferable 67108864;
+            };
+            HardResourceLimits = {
+              NumberOfFiles = mkPreferable 1048576;
+              NumberOfProcesses = mkPreferable 1048576;
+              Stack = mkPreferable 67108864;
+            };
           };
 
         };
@@ -170,10 +181,16 @@
             self.packages.${pkgs.stdenv.system}.default
           ];
 
-          systemd.services.nix-daemon.serviceConfig.ExecStart = [
-            ""
-            "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin"
-          ];
+          systemd.services.nix-daemon.serviceConfig = {
+            ExecStart = [
+              ""
+              "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin"
+            ];
+            KillMode = mkPreferable "process";
+            LimitNOFILE = mkMorePreferable 1048576;
+            LimitSTACK = mkPreferable "64M";
+            TasksMax = mkPreferable 1048576;
+          };
 
           systemd.sockets.nix-daemon.socketConfig.FileDescriptorName = "nix-daemon.socket";
           systemd.sockets.determinate-nixd = {
