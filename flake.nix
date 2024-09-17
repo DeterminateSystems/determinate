@@ -200,13 +200,13 @@
 
             unitConfig = {
               RequiresMountsFor = [ "/nix/store" "/nix/var/determinate" ];
-              ConditionPathIsReadWrite = [ "/nix/var/determinate" ];
             };
 
             socketConfig = {
               Service = "nix-daemon.service";
               FileDescriptorName = "determinate-nixd.socket";
               ListenStream = "/nix/var/determinate/determinate-nixd.socket";
+              DirectoryMode = "0755";
             };
           };
         };

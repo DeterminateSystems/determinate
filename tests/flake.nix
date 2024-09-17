@@ -33,6 +33,9 @@
 
       modules = [
         determinate.darwinModules.default
+        {
+          system.stateVersion = 5;
+        }
       ];
     }).system;
   };
