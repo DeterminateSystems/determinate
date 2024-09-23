@@ -129,43 +129,7 @@
         ];
 
         config = {
-          services.nix-daemon.enable = true;
-          launchd.daemons.nix-daemon.serviceConfig = {
-            StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
-            StandardOutPath = lib.mkForce "/var/log/determinate-nixd.log";
-
-            ProgramArguments = lib.mkForce [
-              "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
-              "--nix-bin"
-              "${config.nix.package}/bin"
-            ];
-
-            Sockets = {
-              "determinate-nixd.socket" = {
-                # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
-                SockPassive = true;
-                SockPathName = "/var/run/determinate-nixd.socket";
-              };
-
-              "nix-daemon.socket" = {
-                # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
-                SockPassive = true;
-                SockPathName = "/var/run/nix-daemon.socket";
-              };
-            };
-
-            SoftResourceLimits = {
-              NumberOfFiles = mkPreferable 1048576;
-              NumberOfProcesses = mkPreferable 1048576;
-              Stack = mkPreferable 67108864;
-            };
-            HardResourceLimits = {
-              NumberOfFiles = mkPreferable 1048576;
-              NumberOfProcesses = mkPreferable 1048576;
-              Stack = mkPreferable 67108864;
-            };
-          };
-
+          nix.useDaemon = true;
         };
       };
 
@@ -177,7 +141,7 @@
         ];
 
         config = {
-          environment.systemPackages =[
+          environment.systemPackages = [
             self.packages.${pkgs.stdenv.system}.default
           ];
 
@@ -196,7 +160,7 @@
           systemd.sockets.determinate-nixd = {
             description = "Determinate Nixd Daemon Socket";
             wantedBy = [ "sockets.target" ];
-            before= [ "multi-user.target" ];
+            before = [ "multi-user.target" ];
 
             unitConfig = {
               RequiresMountsFor = [ "/nix/store" "/nix/var/determinate" ];
