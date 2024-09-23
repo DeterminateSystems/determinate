@@ -130,6 +130,42 @@
 
         config = {
           nix.useDaemon = true;
+
+          launchd.daemons.determinate-nixd.serviceConfig = {
+            StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
+            StandardOutPath = lib.mkForce "/var/log/determinate-nixd.log";
+
+            ProgramArguments = lib.mkForce [
+              "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
+              "--nix-bin"
+              "${config.nix.package}/bin"
+            ];
+
+            Sockets = {
+              "determinate-nixd.socket" = {
+                # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
+                SockPassive = true;
+                SockPathName = "/var/run/determinate-nixd.socket";
+              };
+
+              "nix-daemon.socket" = {
+                # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
+                SockPassive = true;
+                SockPathName = "/var/run/nix-daemon.socket";
+              };
+            };
+
+            SoftResourceLimits = {
+              NumberOfFiles = mkPreferable 1048576;
+              NumberOfProcesses = mkPreferable 1048576;
+              Stack = mkPreferable 67108864;
+            };
+            HardResourceLimits = {
+              NumberOfFiles = mkPreferable 1048576;
+              NumberOfProcesses = mkPreferable 1048576;
+              Stack = mkPreferable 67108864;
+            };
+          };
         };
       };
 
