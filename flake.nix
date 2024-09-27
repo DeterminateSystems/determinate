@@ -135,7 +135,7 @@
           # Make sure that the user can't enable the nix-daemon in their own nix-darwin config
           services.nix-daemon.enable = lib.mkForce false;
 
-          launchd.daemons.determinate-nixd.serviceConfig = {
+          launchd.daemons.nix-daemon.serviceConfig = {
             StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
             StandardOutPath = lib.mkForce "/var/log/determinate-nixd.log";
 
