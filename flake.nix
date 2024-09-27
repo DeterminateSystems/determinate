@@ -129,14 +129,18 @@
         ];
 
         config = {
+          # Make Nix use the Nix daemon
           nix.useDaemon = true;
+
+          # Make sure that the user can't enable the nix-daemon in their own nix-darwin config
+          services.nix-daemon.enable = lib.mkForce false;
 
           launchd.daemons.determinate-nixd.serviceConfig = {
             StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
             StandardOutPath = lib.mkForce "/var/log/determinate-nixd.log";
 
             ProgramArguments = lib.mkForce [
-              "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
+              "/usr/local/bin/determinate-nixd"
               "--nix-bin"
               "${config.nix.package}/bin"
             ];
