@@ -141,11 +141,10 @@
           };
 
           system.preActivation.text = ''
-              cp ${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd /usr/local/bin/.determinate-nixd.next
-              chmod +x /usr/local/bin/.determinate-nixd.next
-              mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
-            '';
-          };
+            cp ${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd /usr/local/bin/.determinate-nixd.next
+            chmod +x /usr/local/bin/.determinate-nixd.next
+            mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
+          '';
 
           launchd.daemons.determinate-nixd-store.serviceConfig = {
             Label = "systems.determinate.nix-store";
