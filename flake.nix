@@ -134,10 +134,33 @@
 
           # Make sure that the user can't enable the nix-daemon in their own nix-darwin config
           services.nix-daemon.enable = lib.mkForce false;
+          launchd.daemons.nix-daemon.serviceConfig.Disabled = true;
+          launchd.daemons.darwin-store.serviceConfig = {
+            Label = "org.nixos.darwin-store";
+            Disabled = true;
+          };
 
-          launchd.daemons.nix-daemon.serviceConfig = {
-            StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
-            StandardOutPath = lib.mkForce "/var/log/determinate-nixd.log";
+          launchd.daemons.determinate-nixd-store.serviceConfig = {
+            Label = "systems.determinate.nix-store";
+            RunAtLoad = true;
+
+
+            StandardErrorPath = lib.mkForce "/var/log/determinate-nix-init.log";
+            StandardOutPath = lib.mkForce "/var/log/determinate-nix-init.log";
+
+            ProgramArguments = lib.mkForce [
+              "/usr/local/bin/determinate-nixd"
+              "--nix-bin"
+              "${config.nix.package}/bin"
+              "init"
+            ];
+          };
+
+          launchd.daemons.determinate-nixd.serviceConfig = {
+            Label = "systems.determinate.nix-daemon";
+
+            StandardErrorPath = lib.mkForce "/var/log/determinate-nix-daemon.log";
+            StandardOutPath = lib.mkForce "/var/log/determinate-nix-daemon.log";
 
             ProgramArguments = lib.mkForce [
               "/usr/local/bin/determinate-nixd"
