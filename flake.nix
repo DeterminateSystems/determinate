@@ -140,13 +140,13 @@
             if test -e /Library/LaunchDaemons/org.nixos.nix-daemon.plist; then
               echo "Unloading org.nixos.nix-daemon"
               launchctl bootout system /Library/LaunchDaemons/org.nixos.nix-daemon.plist || true
-              mv /Library/LaunchDaemons/org.nixos.nix-daemon.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.nix-daemon.plist
+              mv /Library/LaunchDaemons/org.nixos.nix-daemon.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.nix-daemon.plist.skip
             fi
 
             if test -e /Library/LaunchDaemons/org.nixos.darwin-store.plist; then
               echo "Unloading org.nixos.darwin-store"
               launchctl bootout system /Library/LaunchDaemons/org.nixos.darwin-store.plist || true
-              mv /Library/LaunchDaemons/org.nixos.darwin-store.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.darwin-store.plist
+              mv /Library/LaunchDaemons/org.nixos.darwin-store.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.darwin-store.plist.skip
             fi
 
             install -d -m 755 -o root /usr/local/bin
