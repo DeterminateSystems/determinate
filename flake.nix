@@ -149,7 +149,7 @@
               mv /Library/LaunchDaemons/org.nixos.darwin-store.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.darwin-store.plist.skip
             fi
 
-            install -d -m 755 -o root /usr/local/bin
+            install -d -m 755 -o root -g wheel /usr/local/bin
             cp ${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd /usr/local/bin/.determinate-nixd.next
             chmod +x /usr/local/bin/.determinate-nixd.next
             mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
