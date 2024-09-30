@@ -135,23 +135,21 @@
           # Make sure that the user can't enable the nix-daemon in their own nix-darwin config
           services.nix-daemon.enable = lib.mkForce false;
 
-          system.activationScripts.nix-daemon = {
-            enable = false;
-            text = lib.mkForce "";
-          };
-
+          system.activationScripts.nix-daemon = lib.mkForce { enable = false; text = ""; };
           system.activationScripts.launchd.text = lib.mkBefore ''
             if test -e /Library/LaunchDaemons/org.nixos.nix-daemon.plist; then
-              launchctl unload /Library/LaunchAgents/org.nixos.nix-daemon.plist || true
-              mv /Library/LaunchAgents/org.nixos.nix-daemon.plist /Library/LaunchAgents/org.nixos.nix-daemon.plist.before-determinate-nixd
+              echo "Unloading org.nixos.nix-daemon"
+              launchctl bootout system /Library/LaunchDaemons/org.nixos.nix-daemon.plist || true
+              mv /Library/LaunchDaemons/org.nixos.nix-daemon.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.nix-daemon.plist
             fi
 
             if test -e /Library/LaunchDaemons/org.nixos.darwin-store.plist; then
-              launchctl unload /Library/LaunchAgents/org.nixos.darwin-store.plist || true
-              mv /Library/LaunchAgents/org.nixos.darwin-store.plist /Library/LaunchAgents/org.nixos.darwin-store.plist.before-determinate-nixd
+              echo "Unloading org.nixos.darwin-store"
+              launchctl bootout system /Library/LaunchDaemons/org.nixos.darwin-store.plist || true
+              mv /Library/LaunchDaemons/org.nixos.darwin-store.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.darwin-store.plist
             fi
 
-            mkdir -p /usr/local/bin/
+            install -d -m 755 -o root /usr/local/bin
             cp ${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd /usr/local/bin/.determinate-nixd.next
             chmod +x /usr/local/bin/.determinate-nixd.next
             mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
