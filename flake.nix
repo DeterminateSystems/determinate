@@ -143,6 +143,7 @@
               "/usr/local/bin/determinate-nixd"
               "--nix-bin"
               "${config.nix.package}/bin"
+              "daemon"
             ];
 
             Sockets = {
@@ -188,7 +189,7 @@
           systemd.services.nix-daemon.serviceConfig = {
             ExecStart = [
               ""
-              "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin"
+              "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin daemon"
             ];
             KillMode = mkPreferable "process";
             LimitNOFILE = mkMorePreferable 1048576;
