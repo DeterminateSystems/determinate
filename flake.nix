@@ -145,7 +145,7 @@
               chmod +x /usr/local/bin/.determinate-nixd.next
               mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
             '';
-          }
+          };
 
           launchd.daemons.determinate-nixd-store.serviceConfig = {
             Label = "systems.determinate.nix-store";
