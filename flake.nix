@@ -6,15 +6,15 @@
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.tar.gz";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/2c18a8f38492d35be64d4e497b720938f17cc9f5/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/df2a97df391a3a7bb2ec44311b977c3ca1b1d202/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/2c18a8f38492d35be64d4e497b720938f17cc9f5/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/rev/df2a97df391a3a7bb2ec44311b977c3ca1b1d202/x86_64-linux";
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/rev/2c18a8f38492d35be64d4e497b720938f17cc9f5/macOS";
+      url = "https://install.determinate.systems/determinate-nixd/rev/df2a97df391a3a7bb2ec44311b977c3ca1b1d202/macOS";
       flake = false;
     };
     determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
@@ -129,15 +129,59 @@
         ];
 
         config = {
-          services.nix-daemon.enable = true;
-          launchd.daemons.nix-daemon.serviceConfig = {
-            StandardErrorPath = lib.mkForce "/var/log/determinate-nixd.log";
-            StandardOutPath = lib.mkForce "/var/log/determinate-nixd.log";
+          # Make Nix use the Nix daemon
+          nix.useDaemon = true;
+
+          # Make sure that the user can't enable the nix-daemon in their own nix-darwin config
+          services.nix-daemon.enable = lib.mkForce false;
+
+          system.activationScripts.nix-daemon = lib.mkForce { enable = false; text = ""; };
+          system.activationScripts.launchd.text = lib.mkBefore ''
+            if test -e /Library/LaunchDaemons/org.nixos.nix-daemon.plist; then
+              echo "Unloading org.nixos.nix-daemon"
+              launchctl bootout system /Library/LaunchDaemons/org.nixos.nix-daemon.plist || true
+              mv /Library/LaunchDaemons/org.nixos.nix-daemon.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.nix-daemon.plist.skip
+            fi
+
+            if test -e /Library/LaunchDaemons/org.nixos.darwin-store.plist; then
+              echo "Unloading org.nixos.darwin-store"
+              launchctl bootout system /Library/LaunchDaemons/org.nixos.darwin-store.plist || true
+              mv /Library/LaunchDaemons/org.nixos.darwin-store.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.darwin-store.plist.skip
+            fi
+
+            install -d -m 755 -o root -g wheel /usr/local/bin
+            cp ${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd /usr/local/bin/.determinate-nixd.next
+            chmod +x /usr/local/bin/.determinate-nixd.next
+            mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
+          '';
+
+          launchd.daemons.determinate-nixd-store.serviceConfig = {
+            Label = "systems.determinate.nix-store";
+            RunAtLoad = true;
+
+
+            StandardErrorPath = lib.mkForce "/var/log/determinate-nix-init.log";
+            StandardOutPath = lib.mkForce "/var/log/determinate-nix-init.log";
 
             ProgramArguments = lib.mkForce [
-              "${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd"
+              "/usr/local/bin/determinate-nixd"
               "--nix-bin"
               "${config.nix.package}/bin"
+              "init"
+            ];
+          };
+
+          launchd.daemons.determinate-nixd.serviceConfig = {
+            Label = "systems.determinate.nix-daemon";
+
+            StandardErrorPath = lib.mkForce "/var/log/determinate-nix-daemon.log";
+            StandardOutPath = lib.mkForce "/var/log/determinate-nix-daemon.log";
+
+            ProgramArguments = lib.mkForce [
+              "/usr/local/bin/determinate-nixd"
+              "--nix-bin"
+              "${config.nix.package}/bin"
+              "daemon"
             ];
 
             Sockets = {
@@ -165,7 +209,6 @@
               Stack = mkPreferable 67108864;
             };
           };
-
         };
       };
 
@@ -177,14 +220,14 @@
         ];
 
         config = {
-          environment.systemPackages =[
+          environment.systemPackages = [
             self.packages.${pkgs.stdenv.system}.default
           ];
 
           systemd.services.nix-daemon.serviceConfig = {
             ExecStart = [
               ""
-              "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin"
+              "@${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd determinate-nixd --nix-bin ${config.nix.package}/bin daemon"
             ];
             KillMode = mkPreferable "process";
             LimitNOFILE = mkMorePreferable 1048576;
@@ -196,7 +239,7 @@
           systemd.sockets.determinate-nixd = {
             description = "Determinate Nixd Daemon Socket";
             wantedBy = [ "sockets.target" ];
-            before= [ "multi-user.target" ];
+            before = [ "multi-user.target" ];
 
             unitConfig = {
               RequiresMountsFor = [ "/nix/store" "/nix/var/determinate" ];
