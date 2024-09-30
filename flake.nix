@@ -135,6 +135,7 @@
           # Make sure that the user can't enable the nix-daemon in their own nix-darwin config
           services.nix-daemon.enable = lib.mkForce false;
 
+          system.activationScripts.nix-daemon.text =  lib.mkForce ""; # It tries to reload org.nixos.nix-daemon
           system.activationScripts.launchd.text = lib.mkBefore ''
             if test -e /Library/LaunchDaemons/org.nixos.nix-daemon.plist; then
               launchctl unload /Library/LaunchAgents/org.nixos.nix-daemon.plist || true
