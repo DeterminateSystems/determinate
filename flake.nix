@@ -142,9 +142,10 @@
 
           system.activationScripts.sync-determinate-nixd = {
             enable = true;
-            cp ${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd /usr/local/bin/.determinate-nixd.next
-            chmod +x /usr/local/bin/.determinate-nixd.next
-            mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
+            text = ''
+              cp ${self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd /usr/local/bin/.determinate-nixd.next
+              chmod +x /usr/local/bin/.determinate-nixd.next
+              mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
             '';
           };
 
