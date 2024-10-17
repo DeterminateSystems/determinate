@@ -1,16 +1,21 @@
 # Determinate
 
-**Determinate** is TODO.
+**Determinate** is [Nix] for the enterprise.
+It provides an end-to-end experience around using Nix, from installation to collaboration to deployment.
 Determinate has two core components:
 
-- [Determinate Nix][det-nix] is TODO.
-  It comes bundled with [`fh`][fh], the CLI for FlakeHub.
-- [FlakeHub] is TODO.
+- [Determinate Nix][det-nix] is [Determinate Systems][detsys]' validate and secure downstream [Nix] distribution.
+  It comes bundled with [Determinate Nixd][dnixd], a helpful daemon that automates some otherwise-unpleasant aspects of using Nix, such as garbage collection and providing Nix with Keychain-provided certificates on macOS.
+- [FlakeHub] is a platform for publishing and discovering Nix flakes, providing [semantic versioning][semver] (SemVer) for flakes and automated flake publishing from [GitHub Actions][actions] and [GitLab CI][gitlab-ci].
 
 You can get started with Determinate in one of two ways:
 
-- If you're on macOS or Linux, you can use the [Determinate Nix Installer](#installing-using-the-determinate-nix-installer).
-- If you're on [NixOS] or use [nix-darwin], you can use the modules provided by the [Nix flake](#installing-using-our-nix-flake) in this repo.
+| Situation                            | How to install                                                               |
+| :----------------------------------- | :--------------------------------------------------------------------------- |
+| **Linux** but not using [NixOS]      | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **macOS** but not using [nix-darwin] | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **Linux** and using [NixOS]          | The [NixOS module](#nixos) provided by this flake                            |
+| **macOS** and using [nix-darwin]     | The [nix-darwin module](#nix-darwin) provided by this flake                  |
 
 ## Installing using the Determinate Nix Installer
 
@@ -28,7 +33,8 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 
 ## Installing using our Nix flake
 
-If you use [nix-darwin] or [NixOS] you can install Determinate using this [Nix flake][flakes]:
+If you use [nix-darwin] or [NixOS] you can install Determinate using this [Nix flake][flakes].
+To add the `determinate` flake as a [flake input][flake-inputs]:
 
 ```nix
 {
@@ -41,7 +47,7 @@ If you use [nix-darwin] or [NixOS] you can install Determinate using this [Nix f
 ### NixOS
 
 If you're a [NixOS] user, you can quickly set up Determinate using the `nixosModules.default` module output from this flake.
-Here's an example `configuration.nix` file:
+Here's an example NixOS configuration:
 
 ```nix
 {
@@ -82,13 +88,16 @@ Here's an example nix-darwin configuration:
 }
 ```
 
+[actions]: https://github.com/features/actions
 [cache]: https://determinate.systems/posts/flakehub-cache-beta
 [det-nix]: https://determinate.systems/nix
 [detsys]: https://determinate.systems
 [fh]: https://github.com/DeterminateSystems/fh
 [flakehub]: https://flakehub.com
+[flake-inputs]: https://zero-to-nix.com/concepts/flakes#inputs
 [flakes]: https://zero-to-nix.com/concepts/flakes
 [follows]: https://zero-to-nix.com/concepts/flakes#inputs
+[gitlab-ci]: https://docs.gitlab.com/ee/ci
 [installer]: https://github.com/DeterminateSystems/nix-installer
 [netrc]: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 [nix]: https://zero-to-nix.com/concepts/nix
@@ -96,3 +105,4 @@ Here's an example nix-darwin configuration:
 [nix-darwin]: https://github.com/LnL7/nix-darwin
 [nixos]: https://zero-to-nix.com/concepts/nixos
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
+[semver]: https://docs.determinate.systems/flakehub/concepts/semver

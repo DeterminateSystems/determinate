@@ -159,7 +159,6 @@
             Label = "systems.determinate.nix-store";
             RunAtLoad = true;
 
-
             StandardErrorPath = lib.mkForce "/var/log/determinate-nix-init.log";
             StandardOutPath = lib.mkForce "/var/log/determinate-nix-init.log";
 
