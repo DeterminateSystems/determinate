@@ -92,6 +92,7 @@ Here's an example nix-darwin configuration:
 [cache]: https://determinate.systems/posts/flakehub-cache-beta
 [det-nix]: https://determinate.systems/nix
 [detsys]: https://determinate.systems
+[dnixd]: https://docs.determinate.systems/determinate-nix/determinate-nixd
 [fh]: https://github.com/DeterminateSystems/fh
 [flakehub]: https://flakehub.com
 [flake-inputs]: https://zero-to-nix.com/concepts/flakes#inputs
