@@ -4,7 +4,7 @@
 It provides an end-to-end experience around using Nix, from installation to collaboration to deployment.
 Determinate has two core components:
 
-- [Determinate Nix][det-nix] is [Determinate Systems][detsys]' validate and secure downstream [Nix] distribution.
+- [Determinate Nix][det-nix] is [Determinate Systems][detsys]' validated and secure downstream [Nix] distribution.
   It comes bundled with [Determinate Nixd][dnixd], a helpful daemon that automates some otherwise-unpleasant aspects of using Nix, such as garbage collection and providing Nix with Keychain-provided certificates on macOS.
 - [FlakeHub] is a platform for publishing and discovering Nix flakes, providing [semantic versioning][semver] (SemVer) for flakes and automated flake publishing from [GitHub Actions][actions] and [GitLab CI][gitlab-ci].
 
