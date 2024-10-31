@@ -117,6 +117,7 @@
             name = "determinate-dev";
 
             buildInputs = with pkgs; [
+              lychee
               nixpkgs-fmt
             ];
           };
