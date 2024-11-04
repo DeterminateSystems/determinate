@@ -116,8 +116,13 @@
           default = pkgs.mkShell {
             name = "determinate-dev";
 
-            buildInputs = with pkgs; [
+            packages = with pkgs; [
+              lychee
               nixpkgs-fmt
+
+              (writeScriptBin "check-readme-links" ''
+                lychee README.md
+              '')
             ];
           };
         });
