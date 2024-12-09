@@ -2,3 +2,4 @@ result*
 
 # Test artifacts
 tests/flake.lock
+.direnv
