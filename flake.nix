@@ -216,6 +216,7 @@
         };
       };
 
+      darwinModules.unmanaged = ./modules/nix-darwin-unmanaged.nix;
 
       nixosModules.default = { lib, pkgs, config, ... }: {
         imports = [
