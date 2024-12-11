@@ -134,6 +134,10 @@
         ];
 
         config = {
+          # Push the user's nix.conf into /etc/nix/nix.custom.conf,
+          # leaving determinate-nixd to manage /etc/nix/nix.conf
+          environment.etc."nix/nix.conf".target = "nix/nix.custom.conf";
+
           # Make Nix use the Nix daemon
           nix.useDaemon = true;
 
