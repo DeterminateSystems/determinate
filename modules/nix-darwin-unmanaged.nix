@@ -30,7 +30,11 @@
   # Necessary for darwin-rebuild, etc. tools.
   # https://github.com/LnL7/nix-darwin/blob/55d07816a0944f06a9df5ef174999a72fa4060c7/pkgs/nix-tools/default.nix#L8
   options.nix.package = lib.mkOption {
-    default = "/nix/var/nix/profiles/default";
+    type = lib.types.package;
+    default = {
+      type = "derivation";
+      outPath = "/nix/var/nix/profiles/default";
+    };
     internal = true;
   };
 
