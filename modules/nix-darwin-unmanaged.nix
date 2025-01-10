@@ -78,7 +78,7 @@
 
   # Scenario: user has an upstream Nix installation that they want to transition to Determinate
   config.system.activationScripts.preActivation.text = lib.mkBefore ''
-    if [ ! -f /Library/LaunchDaemons/systems.determinate.nix-store.plist ] || [ ! -f /usr/local/bin/determinate-nixd ]; then
+    if ! determinate-nixd status > /dev/null 2>&1 ; then
       echo "Determinate is not installed."
       echo "Download and install the Determinate package before activating the nix-darwin module."
       echo ""
