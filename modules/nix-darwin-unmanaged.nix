@@ -79,10 +79,10 @@
   # Scenario: user has previously used the "default" module before we went to an unmanaged nix.
   # The symlinks defeat the diff logic (because the symlink points to the file, they have the same content!)
   # It also defeats the deletion logic (the file exists in the new profile's LaunchDaemons directory)
-  environment.launchDaemons."systems.determinate.nix-store.plist".source = pkgs.runCommand "nix-store-ln" {} ''
+  config.environment.launchDaemons."systems.determinate.nix-store.plist".source = pkgs.runCommand "nix-store-ln" {} ''
     ln -s /Library/LaunchDaemons/systems.determinate.nix-store.plist $out
   '';
-  environment.launchDaemons."systems.determinate.nix-daemon.plist".source = pkgs.runCommand "nix-daemon-ln" {} ''
+  config.environment.launchDaemons."systems.determinate.nix-daemon.plist".source = pkgs.runCommand "nix-daemon-ln" {} ''
     ln -s /Library/LaunchDaemons/systems.determinate.nix-daemon.plist $out
   '';
 }
