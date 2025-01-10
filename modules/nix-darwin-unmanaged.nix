@@ -75,8 +75,19 @@
 
 
   ### Help the user migrate from managed to unmanaged
-  #
-  # Scenario: user has previously used the "default" module before we went to an unmanaged nix.
+
+  # Scenario: user has an upstream Nix installation that they want to transition to Determinate
+  config.system.activationScripts.preActivation.text = lib.mkBefore ''
+    if [ ! -f /Library/LaunchDaemons/systems.determinate.nix-store.plist ] || [ ! -f /usr/local/bin/determinate-nixd ]; then
+      echo "Determinate is not installed."
+      echo "Download and install the Determinate package before activating the nix-darwin module."
+      echo ""
+      echo "https://docs.determinate.systems/get-started"
+      exit 1
+    fi
+  '';
+
+  # Scenario: user has previously used the "default" determinate module before we went to an unmanaged nix.
   # The symlinks defeat the diff logic (because the symlink points to the file, they have the same content!)
   # It also defeats the deletion logic (the file exists in the new profile's LaunchDaemons directory)
   config.environment.launchDaemons."systems.determinate.nix-store.plist".source = pkgs.runCommand "nix-store-ln" {} ''
