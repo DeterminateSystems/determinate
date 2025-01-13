@@ -1,4 +1,15 @@
-{ lib, pkgs, ... }: {
+{ lib, pkgs, ... }:
+let
+  failWithoutDeterminateMessage = ''
+    if ! /usr/local/bin/determinate-nixd status > /dev/null 2>&1 ; then
+      echo "Determinate is not installed."
+      echo "Download and install the Determinate package before activating the nix-darwin module."
+      echo ""
+      echo "https://docs.determinate.systems/get-started"
+      exit 1
+    fi
+  '';
+in {
   # Disable some modules that conflict with determinate-nixd.
   disabledModules = [
     # Wants to add an outdated Nix to the environment, manage nix.conf, manage the
@@ -77,19 +88,16 @@
   ### Help the user migrate from managed to unmanaged
 
   # Scenario: user has an upstream Nix installation that they want to transition to Determinate
-  config.system.activationScripts.preActivation.text = lib.mkBefore ''
-    if ! /usr/local/bin/determinate-nixd status > /dev/null 2>&1 ; then
-      echo "Determinate is not installed."
-      echo "Download and install the Determinate package before activating the nix-darwin module."
-      echo ""
-      echo "https://docs.determinate.systems/get-started"
-      exit 1
-    fi
-  '';
+  config.system.activationScripts.preActivation.text = lib.mkBefore failWithoutDeterminateMessage;
+  config.system.activationScripts.preUserActivation.text = lib.mkBefore failWithoutDeterminateMessage;
 
   # Scenario: user has previously used the "default" determinate module before we went to an unmanaged nix.
-  # The symlinks defeat the diff logic (because the symlink points to the file, they have the same content!)
-  # It also defeats the deletion logic (the file exists in the new profile's LaunchDaemons directory)
+  #
+  # The symlinks defeat nix-darwin's activation-time unload/update/reload logic for launchd services.
+  # Because the symlink points to the file, they have the same content, nix-darwin won't try to update or reload the service.
+  #
+  # It also defeats nix-darwin's deletion logic, which will delete any LaunchDaemon that was managed by the previously active generation and is not present in the now-activating generation.
+  # Since the file will now exist in the new profile's LaunchDaemons directory, it will not be deleted.
   config.environment.launchDaemons."systems.determinate.nix-store.plist".source = pkgs.runCommand "nix-store-ln" {} ''
     ln -s /Library/LaunchDaemons/systems.determinate.nix-store.plist $out
   '';
