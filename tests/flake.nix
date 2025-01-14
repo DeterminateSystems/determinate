@@ -3,7 +3,7 @@
     determinate.url = "path:../";
     nixpkgs.follows = "determinate/nix/nixpkgs";
     nix-darwin = {
-      url = "github:LnL7/nix-darwin";
+      url = "github:LnL7/nix-darwin/nix-darwin-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
@@ -23,7 +23,7 @@
             fsType = "ext4";
           };
           boot.loader.grub.devices = [ "/dev/bogus" ];
-          system.stateVersion = "24.05";
+          system.stateVersion = "24.11";
         }
       ];
     }).config.system.build.toplevel;
