@@ -38,5 +38,16 @@
         }
       ];
     }).system;
+
+    checks.aarch64-darwin.nix-darwin-unmanaged = (nix-darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
+
+      modules = [
+        determinate.darwinModules.unmanaged
+        {
+          system.stateVersion = 5;
+        }
+      ];
+    }).system;
   };
 }
