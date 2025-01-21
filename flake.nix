@@ -22,9 +22,7 @@
 
   outputs = { self, nixpkgs, ... } @ inputs:
     let
-      lastModifiedDate = self.lastModifiedDate or self.lastModified or "19700101";
-
-      version = "${builtins.substring 0 8 lastModifiedDate}-${self.shortRev or "dirty"}";
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
 
       pkgsFor = system: import nixpkgs {
         inherit system;
@@ -32,8 +30,6 @@
           allowUnfree = true;
         };
       };
-
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
 
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         inherit system;
