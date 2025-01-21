@@ -8,31 +8,79 @@
     };
   };
 
-  outputs = { nixpkgs, determinate, nix-darwin, ... }: {
-    checks.x86_64-linux.nixos = (nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        determinate.nixosModules.default
+  outputs =
+    {
+      nixpkgs,
+      determinate,
+      nix-darwin,
+      ...
+    }:
+    let
+      mkNixOS =
         {
-          fileSystems."/" = {
-            device = "/dev/bogus";
-            fsType = "ext4";
-          };
-          boot.loader.grub.devices = [ "/dev/bogus" ];
-          system.stateVersion = "24.11";
-        }
-      ];
-    }).config.system.build.toplevel;
+          modules ? [ ],
+        }:
+        (nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            determinate.nixosModules.default
+            {
+              fileSystems."/" = {
+                device = "/dev/bogus";
+                fsType = "ext4";
+              };
+              boot.loader.grub.devices = [ "/dev/bogus" ];
+              system.stateVersion = "24.11";
+            }
+          ] ++ modules;
+        }).config.system.build.toplevel;
 
-    checks.aarch64-darwin.nix-darwin = (nix-darwin.lib.darwinSystem {
-      system = "aarch64-darwin";
-
-      modules = [
-        determinate.darwinModules.default
+      mkNixDarwin =
         {
-          system.stateVersion = 5;
-        }
-      ];
-    }).system;
-  };
+          modules ? [ ],
+        }:
+        (nix-darwin.lib.darwinSystem {
+          system = "aarch64-darwin";
+
+          modules = [
+            determinate.darwinModules.default
+            {
+              system.stateVersion = 5;
+            }
+          ] ++ modules;
+        }).system;
+    in
+    {
+      packages.x86_64-linux = {
+        default = mkNixOS { };
+
+        custom-conf = mkNixOS {
+          modules = [
+            {
+              nix.settings = {
+                substituters = [ "https://nix-community.cachix.org" ];
+                trusted-substituters = [ "https://nix-community.cachix.org" ];
+                trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
+              };
+            }
+          ];
+        };
+      };
+
+      packages.aarch64-darwin = {
+        default = mkNixDarwin { };
+
+        custom-conf = mkNixDarwin {
+          modules = [
+            {
+              nix.settings = {
+                substituters = [ "https://nix-community.cachix.org" ];
+                trusted-substituters = [ "https://nix-community.cachix.org" ];
+                trusted-public-keys = [ "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" ];
+              };
+            }
+          ];
+        };
+      };
+    };
 }

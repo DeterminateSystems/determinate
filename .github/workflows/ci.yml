@@ -46,6 +46,10 @@ jobs:
           rm -f flake.lock
           nix flake lock
           nix flake check
+
+          # ensure relocating nix.conf to nix.custom.conf worked
+          nix build .#custom-conf --out-link /tmp/custom-conf
+          grep --quiet nix-community /tmp/custom-conf/etc/nix/nix.custom.conf
       - run: |
           set -eux
 
