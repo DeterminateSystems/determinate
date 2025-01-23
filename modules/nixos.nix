@@ -15,6 +15,10 @@ in
   ];
 
   config = {
+    # Push the user's nix.conf into /etc/nix/nix.custom.conf,
+    # leaving determinate-nixd to manage /etc/nix/nix.conf
+    environment.etc."nix/nix.conf".target = "nix/nix.custom.conf";
+
     environment.systemPackages = [
       inputs.self.packages.${pkgs.stdenv.system}.default
     ];
