@@ -47,9 +47,12 @@ jobs:
           nix flake lock
           nix flake check
 
+          # don't check custom conf relocation on darwin while we work with nix-darwin to make this a good experience
+          if [ "$(nix eval --raw --impure --expr 'builtins.currentSystem')" = "x86_64-linux" ]; then
           # ensure relocating nix.conf to nix.custom.conf worked
           nix build .#custom-conf --out-link /tmp/custom-conf
           grep --quiet nix-community /tmp/custom-conf/etc/nix/nix.custom.conf
+          fi
       - run: |
           set -eux
 
