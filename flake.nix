@@ -62,7 +62,8 @@
           };
         });
 
-      darwinModules.default = import ./modules/nix-darwin.nix inputs;
+      # Stub for migration.
+      darwinModules.default = ./modules/nix-darwin.nix;
 
       nixosModules.default = import ./modules/nixos.nix inputs;
     };

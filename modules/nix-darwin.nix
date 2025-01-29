@@ -1,97 +1,89 @@
-inputs:
-{ lib, config, pkgs, ... }:
+{ lib, options, ... }:
 let
-  inherit (import ./shared.nix inputs)
-    commonNixSettingsModule
-    restrictedNixSettingsModule
-    mkPreferable
-  ;
+  postMigrationInstructions = ''
+    You have successfully migrated your Determinate installation.
+    Please remove `determinate.darwinModules.default` from your
+    nix-darwin configuration, and ensure that you have nix-darwin’s own
+    Nix installation management disabled by setting:
+
+        nix.enable = false;
+
+    Then run `darwin-rebuild switch` again.
+  '';
 in
 {
-  imports = [
-    commonNixSettingsModule
-    restrictedNixSettingsModule
-  ];
+  config =
+    # Check if nix-darwin is new enough for the `nix.enable` option.
+    if options.nix.enable.visible or true then
+      {
+        nix.enable = false;
 
-  config = {
-    # Make Nix use the Nix daemon
-    nix.useDaemon = true;
+        system.activationScripts.checks.text = lib.mkBefore ''
+          if [[ ! -e /usr/local/bin/determinate-nixd ]]; then
+            printf >&2 '\e[1;31merror: Determinate not installed, aborting activation\e[0m\n'
+            printf >&2 'The Determinate nix-darwin module is no longer necessary. To install\n'
+            printf >&2 'Determinate, remove `determinate.darwinModules.default` from your\n'
+            printf >&2 'configuration and follow the installation installations at\n'
+            printf >&2 '<https://docs.determinate.systems/getting-started/individuals>.\n'
+            exit 2
+          fi
 
-    # Make sure that the user can't enable the nix-daemon in their own nix-darwin config
-    services.nix-daemon.enable = lib.mkForce false;
+          # Hack: Detect the version of the `.plist` set up by the old
+          # version of the module.
+          if grep -- '--nix-bin' /Library/LaunchDaemons/systems.determinate.nix-daemon.plist >/dev/null; then
+            printf >&2 '\e[1;31merror: Determinate needs migration, aborting activation\e[0m\n'
+            printf >&2 'Determinate now manages the Nix installation independently of the\n'
+            printf >&2 'nix-darwin module.\n'
+            printf >&2 '\n'
+            printf >&2 'Please download and run the macOS installer from\n'
+            printf >&2 '<https://docs.determinate.systems/getting-started/individuals> and then\n'
+            printf >&2 'run `darwin-rebuild switch` again to migrate your installation.\n'
+            exit 2
+          fi
 
-    system.activationScripts.nix-daemon = lib.mkForce { enable = false; text = ""; };
-    system.activationScripts.launchd.text = lib.mkBefore ''
-      if test -e /Library/LaunchDaemons/org.nixos.nix-daemon.plist; then
-        echo "Unloading org.nixos.nix-daemon"
-        launchctl bootout system /Library/LaunchDaemons/org.nixos.nix-daemon.plist || true
-        mv /Library/LaunchDaemons/org.nixos.nix-daemon.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.nix-daemon.plist.skip
-      fi
+          if [[ ! -e /run/current-system/Library/LaunchDaemons/systems.determinate.nix-daemon.plist ]]; then
+            printf >&2 '\e[1;31merror: deprecated Determinate module present, aborting activation\e[0m\n'
+            printf >&2 '%s' ${lib.escapeShellArg postMigrationInstructions}
+            exit 2
+          fi
+        '';
 
-      if test -e /Library/LaunchDaemons/org.nixos.darwin-store.plist; then
-        echo "Unloading org.nixos.darwin-store"
-        launchctl bootout system /Library/LaunchDaemons/org.nixos.darwin-store.plist || true
-        mv /Library/LaunchDaemons/org.nixos.darwin-store.plist /Library/LaunchDaemons/.before-determinate-nixd.org.nixos.darwin-store.plist.skip
-      fi
+        system.activationScripts.extraActivation.text = lib.mkBefore ''
+          # Hack: Make sure nix-darwin doesn’t clobber the Determinate
+          # launchd daemons after they become unmanaged.
 
-      install -d -m 755 -o root -g wheel /usr/local/bin
-      cp ${inputs.self.packages.${pkgs.stdenv.system}.default}/bin/determinate-nixd /usr/local/bin/.determinate-nixd.next
-      chmod +x /usr/local/bin/.determinate-nixd.next
-      mv /usr/local/bin/.determinate-nixd.next /usr/local/bin/determinate-nixd
-    '';
+          determinateDaemonsStash=$(mktemp -d --suffix=determinate-daemons)
+          cp -a /Library/LaunchDaemons/systems.determinate.{nix-daemon,nix-store}.plist "$determinateDaemonsStash"
 
-    launchd.daemons.determinate-nixd-store.serviceConfig = {
-      Label = "systems.determinate.nix-store";
-      RunAtLoad = true;
+          # shellcheck disable=SC2317
+          restoreDeterminateDaemons() {
+            printf >&2 'restoring Determinate daemons...\n'
+            mv "$determinateDaemonsStash"/*.plist /Library/LaunchDaemons
+            rmdir "$determinateDaemonsStash"
+            launchctl load -w /Library/LaunchDaemons/systems.determinate.nix-daemon.plist
+            launchctl load -w /Library/LaunchDaemons/systems.determinate.nix-store.plist
+            printf >&2 '\n'
+            printf >&2 '%s' ${lib.escapeShellArg postMigrationInstructions}
+          }
 
-      StandardErrorPath = lib.mkForce "/var/log/determinate-nix-init.log";
-      StandardOutPath = lib.mkForce "/var/log/determinate-nix-init.log";
+          trap restoreDeterminateDaemons EXIT
+        '';
+      }
+    else
+      {
+        assertions = [
+          {
+            assertion = false;
+            message = ''
+              Determinate now manages the Nix installation independently of
+              the nix-darwin module.
 
-      ProgramArguments = lib.mkForce [
-        "/usr/local/bin/determinate-nixd"
-        "--nix-bin"
-        "${config.nix.package}/bin"
-        "init"
-      ];
-    };
-
-    launchd.daemons.determinate-nixd.serviceConfig = {
-      Label = "systems.determinate.nix-daemon";
-
-      StandardErrorPath = lib.mkForce "/var/log/determinate-nix-daemon.log";
-      StandardOutPath = lib.mkForce "/var/log/determinate-nix-daemon.log";
-
-      ProgramArguments = lib.mkForce [
-        "/usr/local/bin/determinate-nixd"
-        "--nix-bin"
-        "${config.nix.package}/bin"
-        "daemon"
-      ];
-
-      Sockets = {
-        "determinate-nixd.socket" = {
-          # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
-          SockPassive = true;
-          SockPathName = "/var/run/determinate-nixd.socket";
-        };
-
-        "nix-daemon.socket" = {
-          # We'd set `SockFamily = "Unix";`, but nix-darwin automatically sets it with SockPathName
-          SockPassive = true;
-          SockPathName = "/var/run/nix-daemon.socket";
-        };
+              Please download and run the macOS installer from
+              <https://docs.determinate.systems/getting-started>,
+              update nix-darwin, and then run `darwin-rebuild switch`
+              again to migrate your installation.
+            '';
+          }
+        ];
       };
-
-      SoftResourceLimits = {
-        NumberOfFiles = mkPreferable 1048576;
-        NumberOfProcesses = mkPreferable 1048576;
-        Stack = mkPreferable 67108864;
-      };
-      HardResourceLimits = {
-        NumberOfFiles = mkPreferable 1048576;
-        NumberOfProcesses = mkPreferable 1048576;
-        Stack = mkPreferable 67108864;
-      };
-    };
-  };
 }

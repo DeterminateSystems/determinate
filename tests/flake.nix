@@ -32,8 +32,8 @@
       system = "aarch64-darwin";
 
       modules = [
-        determinate.darwinModules.default
         {
+          nix.enable = false;
           system.stateVersion = 5;
         }
       ];
