@@ -13,15 +13,14 @@ You can get started with Determinate in one of two ways:
 | Situation                            | How to install                                                               |
 | :----------------------------------- | :--------------------------------------------------------------------------- |
 | **Linux** but not using [NixOS]      | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
-| **macOS** but not using [nix-darwin] | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **macOS**                            | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
 | **Linux** and using [NixOS]          | The [NixOS module](#nixos) provided by this flake                            |
-| **macOS** and using [nix-darwin]     | The [nix-darwin module](#nix-darwin) provided by this flake                  |
 
 ## Installing using the Determinate Nix Installer
 
 If you use...
 
-- **macOS** (not [nix-darwin]) or
+- **macOS** (including [nix-darwin]) or
 - **Linux** (not [NixOS])
 
 ...you can install Determinate using the [Determinate Nix Installer][installer] with the `--determinate` flag:
@@ -33,7 +32,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 
 ## Installing using our Nix flake
 
-If you use [nix-darwin] or [NixOS] you can install Determinate using this [Nix flake][flakes].
+If you use [NixOS] you can install Determinate using this [Nix flake][flakes].
 To add the `determinate` flake as a [flake input][flake-inputs]:
 
 ```nix
@@ -44,9 +43,7 @@ To add the `determinate` flake as a [flake input][flake-inputs]:
 
 > We recommend not using a [`follows`][follows] directive for [Nixpkgs] (`inputs.nixpkgs.follows = "nixpkgs"`) in conjunction with the Determinate flake, as it leads to cache misses for artifacts otherwise available from [FlakeHub Cache][cache].
 
-### NixOS
-
-If you're a [NixOS] user, you can quickly set up Determinate using the `nixosModules.default` module output from this flake.
+You can quickly set up Determinate using the `nixosModules.default` module output from this flake.
 Here's an example NixOS configuration:
 
 ```nix
@@ -60,28 +57,6 @@ Here's an example NixOS configuration:
       modules = [
         # Load the Determinate module
         determinate.nixosModules.default
-      ];
-    };
-  };
-}
-```
-
-### nix-darwin
-
-If you're a [nix-darwin] user on macOS, you can quickly set up Determinate using the `darwinModules.default` module output from this flake.
-Here's an example nix-darwin configuration:
-
-```nix
-{
-  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
-  inputs.nix-darwin.url = "github:LnL7/nix-darwin";
-
-  outputs = { determinate, nix-darwin, ... }: {
-    darwinConfigurations.my-workstation-aarch64-darwin = nix-darwin.lib.darwinSystem {
-      system = "aarch64-darwin";
-      modules = [
-        # Load the Determinate module
-        determinate.darwinModules.default
       ];
     };
   };
