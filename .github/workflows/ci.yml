@@ -70,11 +70,11 @@ jobs:
     steps:
       - run: true
       - uses: actions/checkout@v4
-        if: env.PUBLISH_TO_FLAKEHUB
+        if: fromJson(env.PUBLISH_TO_FLAKEHUB)
       - uses: DeterminateSystems/nix-installer-action@main
-        if: env.PUBLISH_TO_FLAKEHUB
+        if: fromJson(env.PUBLISH_TO_FLAKEHUB)
       - uses: "DeterminateSystems/flakehub-push@main"
-        if: env.PUBLISH_TO_FLAKEHUB
+        if: fromJson(env.PUBLISH_TO_FLAKEHUB)
         with:
           rolling: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
           visibility: "unlisted"
