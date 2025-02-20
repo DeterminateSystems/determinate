@@ -24,7 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+        with:
+          determinate: true
+      - uses: DeterminateSystems/flakehub-cache-action@main
 
       - name: Check external links
         run: |
@@ -60,7 +62,7 @@ jobs:
 
   publish:
     environment: ${{ github.event_name == 'release' && 'production' || '' }}
-    needs: [test-modules]
+    needs: [checks, test-modules]
     runs-on: ubuntu-latest
     permissions:
       contents: read
