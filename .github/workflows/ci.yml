@@ -68,7 +68,6 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - run: true
       - uses: actions/checkout@v4
         if: fromJson(env.PUBLISH_TO_FLAKEHUB)
       - uses: DeterminateSystems/nix-installer-action@main
