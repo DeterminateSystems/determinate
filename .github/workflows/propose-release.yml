@@ -26,7 +26,6 @@ jobs:
       reference-id: ${{ inputs.reference-id }}
       version: ${{ inputs.version }}
       extra-commands-early: |
-        sed -ix "s#https://install.determinate.systems/determinate-nixd/tag/.*/#https://install.determinate.systems/determinate-nixd/tag/${{ inputs.determinate-nixd-tag-name }}/#" ./flake.nix
-        rm flake.nixx
+        sed -i "s#https://install.determinate.systems/determinate-nixd/tag/.*/#https://install.determinate.systems/determinate-nixd/tag/${{ inputs.determinate-nixd-tag-name }}/#" ./flake.nix
         git add flake.nix
         git commit -m "Update determinate-nixd binaries to ${{ inputs.determinate-nixd-tag-name }}"
