@@ -3,37 +3,37 @@
     "determinate-nixd-aarch64-darwin": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-GE2pMfgBR+t1w0TKtVnzqLLFHGHOCuSuzN+jz81DFzU=",
+        "narHash": "sha256-schScrGg7X4ggshUYZmzQwk8tchW5OpR3PY9xxtAeco=",
         "type": "file",
-        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.1/macOS"
+        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.2/macOS"
       },
       "original": {
         "type": "file",
-        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.1/macOS"
+        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.2/macOS"
       }
     },
     "determinate-nixd-aarch64-linux": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-yXwaE51koZI1VG4pXiUjNCInd1dBJ6XeBynAPmRLKNY=",
+        "narHash": "sha256-0iZSTDb2u3s5HycSnw4z8YNfvXRTWWxhhvCaDqbTiRk=",
         "type": "file",
-        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.1/aarch64-linux"
+        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.2/aarch64-linux"
       },
       "original": {
         "type": "file",
-        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.1/aarch64-linux"
+        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.2/aarch64-linux"
       }
     },
     "determinate-nixd-x86_64-linux": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-KzOTXBRjKi984jWLkvPU7arM0H4KmqjTmtaw54j9ENo=",
+        "narHash": "sha256-fJTQkK9msoN02ria44WwXHi05fsJT9Rny69ENGmbOUc=",
         "type": "file",
-        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.1/x86_64-linux"
+        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.2/x86_64-linux"
       },
       "original": {
         "type": "file",
-        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.1/x86_64-linux"
+        "url": "https://install.determinate.systems/determinate-nixd/tag/v0.37.2/x86_64-linux"
       }
     },
     "flake-compat": {
