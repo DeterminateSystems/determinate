@@ -2,7 +2,7 @@
   description = "Determinate";
 
   inputs = {
-    nix.url = "https://flakehub.com/f/DeterminateSystems/nix/2.0";
+    nix.url = "https://flakehub.com/f/DeterminateSystems/nix-src/*";
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.tar.gz";
 
     determinate-nixd-aarch64-linux = {
