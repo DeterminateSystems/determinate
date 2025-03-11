@@ -18,12 +18,9 @@ You can get started with Determinate in one of two ways:
 
 ## Installing using the Determinate Nix Installer
 
-If you use...
+**macOS** users, including [nix-darwin] users, should install Determinate using [Determinate.pkg][pkg], our graphical installer.
 
-- **macOS** (including [nix-darwin]) or
-- **Linux** (not [NixOS])
-
-...you can install Determinate using the [Determinate Nix Installer][installer] with the `--determinate` flag:
+**Linux** users who are not on [NixOS] should use the [Determinate Nix Installer][installer] with the `--determinate` flag:
 
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
@@ -82,4 +79,5 @@ Here's an example NixOS configuration:
 [nix-darwin]: https://github.com/LnL7/nix-darwin
 [nixos]: https://zero-to-nix.com/concepts/nixos
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
+[pkg]: https://install.determinate.systems/determinate-pkg/stable/Universal
 [semver]: https://docs.determinate.systems/flakehub/concepts/semver
