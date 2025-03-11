@@ -20,12 +20,14 @@ You can get started with Determinate in one of two ways:
 
 **macOS** users, including [nix-darwin] users, should install Determinate using [Determinate.pkg][pkg], our graphical installer.
 
-**Linux** users who are not on [NixOS] should use the [Determinate Nix Installer][installer] with the `--determinate` flag:
+**Linux** users who are *not* on [NixOS] should use the [Determinate Nix Installer][installer] with the `--determinate` flag:
 
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
   sh -s -- install --determinate
 ```
+
+Linux users who *are* on NixOS should follow the instructions [below](#installing-using-our-flake).
 
 ## Installing using our Nix flake
 
