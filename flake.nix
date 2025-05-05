@@ -2,7 +2,8 @@
   description = "Determinate";
 
   inputs = {
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
+    nix.url = "https://flakehub.com/f/DeterminateSystems/nix-src/*";
+    nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
 
     determinate-nixd-aarch64-linux = {
       url = "https://install.determinate.systems/determinate-nixd/tag/v3.4.2/aarch64-linux";
@@ -16,22 +17,24 @@
 
   outputs = { self, nixpkgs, ... } @ inputs:
     let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+      linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
+      allSystems = linuxSystems ++ [ "aarch64-darwin" "x86_64-darwin" ];
 
-      pkgsFor = system: import nixpkgs {
+      forSystems = systems: f: nixpkgs.lib.genAttrs systems (system: f {
         inherit system;
-        config = {
-          allowUnfree = true;
+        pkgs = import nixpkgs {
+          inherit system;
+          config = {
+            allowUnfree = true;
+          };
         };
-      };
-
-      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
-        inherit system;
-        pkgs = pkgsFor system;
       });
+
+      forLinuxSystems = forSystems linuxSystems;
+      forAllSystems = forSystems allSystems;
     in
     {
-      packages = forAllSystems ({ system, pkgs, ... }: {
+      packages = forLinuxSystems ({ system, pkgs, ... }: {
         default = pkgs.runCommand "determinate-nixd" { } ''
           mkdir -p $out/bin
           cp ${inputs."determinate-nixd-${system}"} $out/bin/determinate-nixd
