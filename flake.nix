@@ -2,8 +2,7 @@
   description = "Determinate";
 
   inputs = {
-    nix.url = "https://flakehub.com/f/DeterminateSystems/nix-src/*";
-    nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.tar.gz";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
 
     determinate-nixd-aarch64-linux = {
       url = "https://install.determinate.systems/determinate-nixd/tag/v3.4.2/aarch64-linux";
@@ -13,11 +12,6 @@
       url = "https://install.determinate.systems/determinate-nixd/tag/v3.4.2/x86_64-linux";
       flake = false;
     };
-    determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.4.2/macOS";
-      flake = false;
-    };
-    determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
   };
 
   outputs = { self, nixpkgs, ... } @ inputs:
