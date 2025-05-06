@@ -27,7 +27,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
   sh -s -- install --determinate
 ```
 
-Linux users who *are* on NixOS should follow the instructions [below](#installing-using-our-flake).
+Linux users who *are* on NixOS should follow the instructions [below](#installing-using-our-nix-flake).
 
 ## Installing using our Nix flake
 

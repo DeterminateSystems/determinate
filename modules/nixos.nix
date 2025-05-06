@@ -1,5 +1,7 @@
 inputs:
+
 { lib, pkgs, config, ... }:
+
 let
   # Stronger than mkDefault (1000), weaker than mkForce (50) and the "default override priority"
   # (100).
@@ -26,7 +28,7 @@ let
       # setting `to` -- we don't want to clobber this if users have set it on their own
       to = lib.mkIf (config.nix.registry.nixpkgs.flake or null == null) (mkPreferable {
         type = "tarball";
-        url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1.0.tar.gz";
+        url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
       });
     };
 
