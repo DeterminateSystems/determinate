@@ -3,12 +3,16 @@
     determinate.url = "path:../";
     nixpkgs.follows = "determinate/nix/nixpkgs";
     nix-darwin = {
-      url = "https://flakehub.com/f/nix-darwin/nix-darwin/0";
+      url = "github:LnL7/nix-darwin/nix-darwin-24.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    home-manager = {
+      url = "github:nix-community/home-manager/release-24.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { nixpkgs, determinate, nix-darwin, ... }: {
+  outputs = { nixpkgs, determinate, home-manager, nix-darwin, ... }: {
     checks.x86_64-linux.nixos = (nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
