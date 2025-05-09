@@ -14,7 +14,7 @@
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.4.2/macOS";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.5.0/macOS";
       flake = false;
     };
     determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
