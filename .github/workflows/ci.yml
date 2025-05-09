@@ -30,6 +30,30 @@ jobs:
           nix develop --command \
             lychee README.md
 
+  verify-outputs:
+    strategy:
+      matrix:
+        runners:
+          - { system: aarch64-darwin, runner: macos-latest-xlarge }
+          - { system: x86_64-darwin, runner: macos-latest-xlarge }
+          - { system: aarch64-linux, runner: UbuntuLatest32Cores128GArm }
+          - { system: x86_64-linux, runner: UbuntuLatest32Cores128GArm  }
+
+    runs-on: ${{ matrix.runners.runner }}
+
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          determinate: true
+      - uses: DeterminateSystems/flakehub-cache-action@main
+      - run: nix build .#packages."$SYSTEM".default
+        env:
+          SYSTEM: ${{ matrix.runners.system }}
+
   test-modules:
     strategy:
       matrix:
@@ -58,7 +82,7 @@ jobs:
           git diff --exit-code
 
   success:
-    needs: [checks, test-modules]
+    needs: [checks, verify-outputs, test-modules]
     runs-on: ubuntu-latest
     steps:
       - run: true

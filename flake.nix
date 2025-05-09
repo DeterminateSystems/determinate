@@ -13,14 +13,18 @@
       url = "https://install.determinate.systems/determinate-nixd/tag/v3.5.0/x86_64-linux";
       flake = false;
     };
+    determinate-nixd-aarch64-darwin = {
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.5.0/macOS";
+      flake = false;
+    };
+    determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
   };
 
   outputs = { self, nixpkgs, ... } @ inputs:
     let
-      linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
-      allSystems = linuxSystems ++ [ "aarch64-darwin" "x86_64-darwin" ];
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
 
-      forSystems = systems: f: nixpkgs.lib.genAttrs systems (system: f {
+      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         inherit system;
         pkgs = import nixpkgs {
           inherit system;
@@ -29,12 +33,9 @@
           };
         };
       });
-
-      forLinuxSystems = forSystems linuxSystems;
-      forAllSystems = forSystems allSystems;
     in
     {
-      packages = forLinuxSystems ({ system, pkgs, ... }: {
+      packages = forEachSupportedSystem ({ system, pkgs, ... }: {
         default = pkgs.runCommand "determinate-nixd" { } ''
           mkdir -p $out/bin
           cp ${inputs."determinate-nixd-${system}"} $out/bin/determinate-nixd
@@ -43,7 +44,7 @@
         '';
       });
 
-      devShells = forAllSystems ({ system, pkgs, ... }:
+      devShells = forEachSupportedSystem ({ system, pkgs, ... }:
         {
           default = pkgs.mkShell {
             name = "determinate-dev";
