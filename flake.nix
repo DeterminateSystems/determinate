@@ -6,11 +6,11 @@
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.4.2/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.5.0/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.4.2/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.5.0/x86_64-linux";
       flake = false;
     };
   };
