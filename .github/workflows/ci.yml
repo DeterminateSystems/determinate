@@ -30,6 +30,15 @@ jobs:
           nix develop --command \
             lychee README.md
 
+      # These outputs are used by nix-installer, so they must exist (and be cached)
+      - name: Ensure load-bearing outputs exist
+        if: success() || failure()
+        run: |
+          nix build -j0 .#packages.aarch64-darwin.default
+          nix build -j0 .#packages.aarch64-linux.default
+          nix build -j0 .#packages.x86_64-darwin.default
+          nix build -j0 .#packages.x86_64-linux.default
+
   test-modules:
     strategy:
       matrix:
