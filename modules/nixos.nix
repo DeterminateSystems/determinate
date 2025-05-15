@@ -73,6 +73,10 @@ in
       inputs.self.packages.${pkgs.stdenv.system}.default
     ];
 
+    # NOTE(cole-h): Move the generated nix.conf to /etc/nix/nix.custom.conf, which is included from
+    # the Determinate Nixd-managed /etc/nix/nix.conf.
+    environment.etc."nix/nix.conf".target = "nix/nix.custom.conf";
+
     systemd.services.nix-daemon.serviceConfig = {
       ExecStart = [
         ""
