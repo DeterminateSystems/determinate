@@ -3,7 +3,7 @@
     determinate.url = "path:../";
     nixpkgs.follows = "determinate/nix/nixpkgs";
     nix-darwin = {
-      url = "https://flakehub.com/f/nix-darwin/nix-darwin/0";
+      url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
