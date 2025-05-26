@@ -36,19 +36,19 @@ To add the `determinate` flake as a [flake input][flake-inputs]:
 
 ```nix
 {
-  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
+  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
 }
 ```
 
 > We recommend not using a [`follows`][follows] directive for [Nixpkgs] (`inputs.nixpkgs.follows = "nixpkgs"`) in conjunction with the Determinate flake, as it leads to cache misses for artifacts otherwise available from [FlakeHub Cache][cache].
 
 You can quickly set up Determinate using the `nixosModules.default` module output from this flake.
-Here's an example NixOS configuration:
+Here's an example NixOS configuration for the current stable NixOS:
 
 ```nix
 {
-  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0.1";
-  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.2405.0";
+  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
 
   outputs = { determinate, nixpkgs, ... }: {
     nixosConfigurations.my-workstation = nixpkgs.lib.nixosSystem {
