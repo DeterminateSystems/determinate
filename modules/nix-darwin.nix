@@ -1,5 +1,7 @@
-{ lib, options, ... }:
+{ lib, options, config, ... }:
 let
+  cfg = config.determinate;
+
   postMigrationInstructions = ''
     You have successfully migrated your Determinate installation.
     Please remove `determinate.darwinModules.default` from your
@@ -12,7 +14,11 @@ let
   '';
 in
 {
-  config =
+  options.determinate = {
+    enable = lib.mkEnableOption "Determinate Nix" // { default = true; };
+  };
+
+  config = lib.mkIf cfg.enable (
     # Check if nix-darwin is new enough for the `nix.enable` option.
     if options.nix.enable.visible or true then
       {
@@ -85,5 +91,6 @@ in
             '';
           }
         ];
-      };
+      }
+  );
 }

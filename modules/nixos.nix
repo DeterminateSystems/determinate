@@ -3,6 +3,8 @@ inputs:
 { lib, pkgs, config, ... }:
 
 let
+  cfg = config.determinate;
+
   # Stronger than mkDefault (1000), weaker than mkForce (50) and the "default override priority"
   # (100).
   mkPreferable = lib.mkOverride 750;
@@ -13,7 +15,7 @@ let
   # The settings configured in this module must be generally settable by users both trusted and
   # untrusted by the Nix daemon. Settings that require being a trusted user belong in the
   # `restrictedSettingsModule` below.
-  commonNixSettingsModule = { config, pkgs, lib, ... }: {
+  commonNixSettingsModule = { config, pkgs, lib, ... }: lib.mkIf cfg.enable {
     nix.package = inputs.nix.packages."${pkgs.stdenv.system}".default;
 
     nix.registry.nixpkgs = {
@@ -38,7 +40,11 @@ in
     commonNixSettingsModule
   ];
 
-  config = {
+  options.determinate = {
+    enable = lib.mkEnableOption "Determinate Nix" // { default = true; };
+  };
+
+  config = lib.mkIf cfg.enable {
     environment.systemPackages = [
       inputs.self.packages.${pkgs.stdenv.system}.default
     ];
