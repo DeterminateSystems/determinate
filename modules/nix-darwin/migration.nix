@@ -1,4 +1,5 @@
 { lib, options, ... }:
+
 let
   postMigrationInstructions = ''
     You have successfully migrated your Determinate installation.
