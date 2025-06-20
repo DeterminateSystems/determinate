@@ -17,7 +17,7 @@ let
   mkKeyValue = k: v: "${lib.escape [ "=" ] k} = ${mkValueString v}";
 in
 {
-  options.determinate-nix.custom = lib.mkOption {
+  options.determinate-nix.customSettings = lib.mkOption {
     # This method of typing Nix configuration borrows heavily from the nix-darwin project:
     # https://github.com/nix-darwin/nix-darwin/blob/0d71cbf88d63e938b37b85b3bf8b238bcf7b39b9/modules/nix/default.nix#L103
     type =
@@ -35,7 +35,7 @@ in
     default = { };
   };
 
-  config = lib.mkIf (config.determinate-nix.custom != { }) {
+  config = lib.mkIf (config.determinate-nix.customSettings != { }) {
     environment.etc."nix/nix.custom.conf".text =
       lib.concatStringsSep "\n" (
         [
@@ -43,7 +43,7 @@ in
           "# Update this file by changing your nix-darwin configuration, not by modifying it directly."
           ""
         ]
-        ++ lib.mapAttrsToList mkKeyValue config.determinate-nix.custom
+        ++ lib.mapAttrsToList mkKeyValue config.determinate-nix.customSettings
       );
   };
 }
