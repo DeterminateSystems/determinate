@@ -6,13 +6,13 @@ let
   mkValueString = v:
     if v == null then ""
     else if builtins.isInt v then builtins.toString v
-    else if builtins.isBool v then builtins.boolToString v
+    else if builtins.isBool v then lib.boolToString v
     else if builtins.isFloat v then lib.strings.floatToString v
     else if builtins.isList v then builtins.toString v
     else if lib.isDerivation v then builtins.toString v
     else if builtins.isPath v then builtins.toString v
     else if builtins.isString v then v
-    else if builtins.isCoercibleToString v then builtins.toString v
+    else if lib.isCoercibleToString v then builtins.toString v
     else abort "The nix conf value ${lib.toPretty {} v} can't be encoded";
   mkKeyValue = k: v: "${lib.escape [ "=" ] k} = ${mkValueString v}";
 in
