@@ -22,7 +22,7 @@ in
     # https://github.com/nix-darwin/nix-darwin/blob/0d71cbf88d63e938b37b85b3bf8b238bcf7b39b9/modules/nix/default.nix#L103
     type =
       let
-        confAtom = lib.types.nullOr (lib.oneOf (with lib.types; [
+        confAtom = lib.types.nullOr (lib.types.oneOf (with lib.types; [
           bool
           int
           float
