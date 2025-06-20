@@ -13,7 +13,7 @@ on:
       - labeled
   release:
     types:
-      - released
+      - published
 
 jobs:
   checks:
@@ -35,7 +35,7 @@ jobs:
           - { system: aarch64-darwin, runner: macos-latest-xlarge }
           - { system: x86_64-darwin, runner: macos-latest-xlarge }
           - { system: aarch64-linux, runner: UbuntuLatest32Cores128GArm }
-          - { system: x86_64-linux, runner: UbuntuLatest32Cores128GArm  }
+          - { system: x86_64-linux, runner: UbuntuLatest32Cores128G  }
 
     runs-on: ${{ matrix.runners.runner }}
 
