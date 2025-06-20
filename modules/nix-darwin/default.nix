@@ -1,6 +1,8 @@
 { lib, ... }:
 
 let
+  inherit (lib) types;
+
   # This method of converting an attribute set to a Nix configuration file borrows heavily from the nix-darwin project:
   # https://github.com/nix-darwin/nix-darwin/blob/0d71cbf88d63e938b37b85b3bf8b238bcf7b39b9/modules/nix/default.nix#L34
   mkValueString = v:
@@ -12,8 +14,8 @@ let
     else if lib.isDerivation v then builtins.toString v
     else if builtins.isPath v then builtins.toString v
     else if builtins.isString v then v
-    else if lib.isCoercibleToString v then builtins.toString v
-    else abort "The nix conf value ${lib.toPretty {} v} can't be encoded";
+    else if lib.strings.isCoercibleToString v then builtins.toString v
+    else abort "The nix conf value ${lib.generators.toPretty {} v} can't be encoded";
   mkKeyValue = k: v: "${lib.escape [ "=" ] k} = ${mkValueString v}";
 in
 {
@@ -22,7 +24,7 @@ in
     # https://github.com/nix-darwin/nix-darwin/blob/0d71cbf88d63e938b37b85b3bf8b238bcf7b39b9/modules/nix/default.nix#L103
     type =
       let
-        confAtom = lib.types.nullOr (lib.types.oneOf (with lib.types; [
+        confAtom = types.nullOr (types.oneOf (with types; [
           bool
           int
           float
@@ -31,7 +33,7 @@ in
           package
         ]));
       in
-      lib.types.attrsOf (lib.types.either confAtom (lib.listOf confAtom));
+      types.attrsOf (types.either confAtom (types.listOf confAtom));
     default = { };
   };
 

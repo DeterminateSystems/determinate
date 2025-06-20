@@ -10,11 +10,11 @@ Determinate has two core components:
 
 You can get started with Determinate in one of two ways:
 
-| Situation                            | How to install                                                               |
-| :----------------------------------- | :--------------------------------------------------------------------------- |
-| **Linux** but not using [NixOS]      | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
-| **macOS**                            | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
-| **Linux** and using [NixOS]          | The [NixOS module](#nixos) provided by this flake                            |
+| Situation                       | How to install                                                               |
+| :------------------------------ | :--------------------------------------------------------------------------- |
+| **Linux** but not using [NixOS] | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **macOS**                       | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **Linux** and using [NixOS]     | The [NixOS module](#nixos) provided by this flake                            |
 
 ## Installing using the Determinate Nix Installer
 
