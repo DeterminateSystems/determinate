@@ -34,6 +34,17 @@ let
       };
     in
     attrsOf (either confAtom (listOf confAtom));
+
+  # Settings that Determinate Nix handles for you
+  disallowedOptions = [
+    "always-allow-substitutes"
+    "bash-prompt-prefix"
+    "extra-experimental-features"
+    "extra-nix-path"
+    "netrc-file"
+    "ssl-cert-file"
+    "upgrade-nix-store-path-url"
+  ];
 in
 {
   options.determinate-nix.customSettings = lib.mkOption {
@@ -56,6 +67,17 @@ in
   };
 
   config = lib.mkIf (config.determinate-nix.customSettings != { }) {
+    assertions = [
+      {
+        assertion =
+          lib.all (key: !lib.hasAttr key config.determinate-nix.customSettings) disallowedOptions;
+        message = ''
+          These settings are not allowed in `determinate-nix.customSettings`:
+              ${lib.concatStringsSep ", " disallowedOptions}
+        '';
+      }
+    ];
+
     environment.etc."nix/nix.custom.conf".text =
       lib.concatStringsSep "\n" (
         [
