@@ -73,7 +73,7 @@ in
           lib.all (key: !lib.hasAttr key config.determinate-nix.customSettings) disallowedOptions;
         message = ''
           These settings are not allowed in `determinate-nix.customSettings`:
-              ${lib.concatStringsSep ", " disallowedOptions}
+            ${lib.concatStringsSep ", " disallowedOptions}
         '';
       }
     ];
