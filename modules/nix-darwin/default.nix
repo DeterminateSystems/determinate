@@ -1,10 +1,11 @@
+# This method of generating Nix configuration borrows heavily from the nix-darwin project:
+# https://github.com/nix-darwin/nix-darwin/blob/0d71cbf88d63e938b37b85b3bf8b238bcf7b39b9/modules/nix/default.nix
+
 { lib, ... }:
 
 let
   inherit (lib) types;
 
-  # This method of converting an attribute set to a Nix configuration file borrows heavily from the nix-darwin project:
-  # https://github.com/nix-darwin/nix-darwin/blob/0d71cbf88d63e938b37b85b3bf8b238bcf7b39b9/modules/nix/default.nix#L34
   mkValueString = v:
     if v == null then ""
     else if builtins.isInt v then builtins.toString v
@@ -17,24 +18,41 @@ let
     else if lib.strings.isCoercibleToString v then builtins.toString v
     else abort "The nix conf value ${lib.generators.toPretty {} v} can't be encoded";
   mkKeyValue = k: v: "${lib.escape [ "=" ] k} = ${mkValueString v}";
-in
-{
-  options.determinate-nix.customSettings = lib.mkOption {
-    # This method of typing Nix configuration borrows heavily from the nix-darwin project:
-    # https://github.com/nix-darwin/nix-darwin/blob/0d71cbf88d63e938b37b85b3bf8b238bcf7b39b9/modules/nix/default.nix#L103
-    type =
-      let
-        confAtom = types.nullOr (types.oneOf (with types; [
+
+  semanticConfType = with types;
+    let
+      confAtom = nullOr
+        (oneOf [
           bool
           int
           float
           str
           path
           package
-        ]));
-      in
-      types.attrsOf (types.either confAtom (types.listOf confAtom));
-    default = { };
+        ]) // {
+        description = "Nix config atom (null, bool, int, float, str, path or package)";
+      };
+    in
+    attrsOf (either confAtom (listOf confAtom));
+in
+{
+  options.determinate-nix.customSettings = lib.mkOption {
+    type = types.submodule {
+      options = {
+        # Configuration options specific to Determinate Nix
+        lazy-trees = lib.mkOption {
+          type = types.bool;
+          default = false;
+          example = true;
+          description = ''
+            Whether to enable [lazy trees](https://determinate.systems/posts/changelog-determinate-nix-366/).
+          '';
+        };
+      };
+
+      # Support "free-form" options in addition to the explicitly defined options above
+      freeformType = semanticConfType;
+    };
   };
 
   config = lib.mkIf (config.determinate-nix.customSettings != { }) {
