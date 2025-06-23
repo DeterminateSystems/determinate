@@ -39,8 +39,6 @@ let
   disallowedOptions = [
     "always-allow-substitutes"
     "bash-prompt-prefix"
-    "extra-experimental-features"
-    "extra-nix-path"
     "netrc-file"
     "ssl-cert-file"
     "upgrade-nix-store-path-url"
