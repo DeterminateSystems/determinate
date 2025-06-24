@@ -18,6 +18,9 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/determinate-nix-action@main
@@ -35,7 +38,7 @@ jobs:
           - { system: aarch64-darwin, runner: macos-latest-xlarge }
           - { system: x86_64-darwin, runner: macos-latest-xlarge }
           - { system: aarch64-linux, runner: UbuntuLatest32Cores128GArm }
-          - { system: x86_64-linux, runner: UbuntuLatest32Cores128G  }
+          - { system: x86_64-linux, runner: UbuntuLatest32Cores128G }
 
     runs-on: ${{ matrix.runners.runner }}
 
