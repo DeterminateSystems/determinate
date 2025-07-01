@@ -47,19 +47,9 @@ in
 {
   options.determinate-nix.customSettings = lib.mkOption {
     type = types.submodule {
-      options = {
-        # Configuration options specific to Determinate Nix
-        lazy-trees = lib.mkOption {
-          type = types.bool;
-          default = false;
-          example = true;
-          description = ''
-            Whether to enable [lazy trees](https://determinate.systems/posts/changelog-determinate-nix-366/).
-          '';
-        };
-      };
+      options = { };
 
-      # Support "free-form" options in addition to the explicitly defined options above
+      # Support "free-form" options
       freeformType = semanticConfType;
     };
   };
