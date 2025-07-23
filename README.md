@@ -10,11 +10,11 @@ Determinate has two core components:
 
 You can get started with Determinate in one of two ways:
 
-| Situation                            | How to install                                                               |
-| :----------------------------------- | :--------------------------------------------------------------------------- |
-| **Linux** but not using [NixOS]      | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
-| **macOS**                            | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
-| **Linux** and using [NixOS]          | The [NixOS module](#nixos) provided by this flake                            |
+| Situation                       | How to install                                                               |
+| :------------------------------ | :--------------------------------------------------------------------------- |
+| **Linux** but not using [NixOS] | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **macOS**                       | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **Linux** and using [NixOS]     | The [NixOS module](#nixos) provided by this flake                            |
 
 ## Installing using the Determinate Nix Installer
 
@@ -62,6 +62,37 @@ Here's an example NixOS configuration for the current stable NixOS:
 }
 ```
 
+## nix-darwin
+
+```nix
+{
+  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0";
+  inputs.nix-darwin = {
+    url = "https://flakehub.com/f/nix-darwin/nix-darwin/0";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
+
+  outputs = { determinate, nixpkgs, ... }: {
+    darwinConfigurations."my-username-aarch64-darwin" = inputs.nix-darwin.lib.darwinSystem {
+      inherit system;
+      modules = [
+        inputs.self.darwinModules.determinate-nix
+        ({ ... }: {
+          # Let Determinate Nix handle Nix configuration
+          nix.enable = false;
+
+          # Provide custom Determinate Nix settings
+          determinate-nix.customSettings = {
+            lazy-trees = true;
+          };
+        })
+      ];
+    };
+  };
+}
+```
+
 [actions]: https://github.com/features/actions
 [cache]: https://determinate.systems/posts/flakehub-cache-beta
 [det-nix]: https://determinate.systems/nix
@@ -78,7 +109,7 @@ Here's an example NixOS configuration for the current stable NixOS:
 [netrc]: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 [nix]: https://zero-to-nix.com/concepts/nix
 [nix-conf]: https://nix.dev/manual/nix/latest/command-ref/conf-file
-[nix-darwin]: https://github.com/LnL7/nix-darwin
+[nix-darwin]: https://github.com/nix-darwin/nix-darwin
 [nixos]: https://zero-to-nix.com/concepts/nixos
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
 [pkg]: https://install.determinate.systems/determinate-pkg/stable/Universal
