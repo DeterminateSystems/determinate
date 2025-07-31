@@ -10,10 +10,10 @@ let
     v:
     if v == null then
       ""
-    else if builtins.isInt v then
-      builtins.toString v
     else if builtins.isBool v then
       lib.boolToString v
+    else if builtins.isInt v then
+      builtins.toString v
     else if builtins.isFloat v then
       lib.strings.floatToString v
     else if builtins.isList v then
@@ -29,7 +29,7 @@ let
     else if lib.strings.isCoercibleToString v then
       builtins.toString v
     else
-      abort "The nix conf value ${lib.generators.toPretty { } v} can't be encoded";
+      abort "The Nix configuration value ${lib.generators.toPretty { } v} can't be encoded";
   mkKeyValue = k: v: "${lib.escape [ "=" ] k} = ${mkValueString v}";
 
   semanticConfType =
@@ -45,7 +45,7 @@ let
           package
         ])
         // {
-          description = "Nix config atom (null, bool, int, float, str, path or package)";
+          description = "Nix configuration atom (null, Boolean, integer, float, list, derivation, path, attribute set)";
         };
     in
     attrsOf (either confAtom (listOf confAtom));
