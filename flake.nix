@@ -20,45 +20,61 @@
     determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
   };
 
-  outputs = { self, nixpkgs, ... } @ inputs:
+  outputs =
+    { self, nixpkgs, ... }@inputs:
     let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
 
-      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
-        inherit system;
-        pkgs = import nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-        };
-      });
+      forEachSupportedSystem =
+        f:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          f {
+            inherit system;
+            pkgs = import nixpkgs {
+              inherit system;
+              config = {
+                allowUnfree = true;
+              };
+            };
+          }
+        );
     in
     {
-      packages = forEachSupportedSystem ({ system, pkgs, ... }: {
-        default = pkgs.runCommand "determinate-nixd" { } ''
-          mkdir -p $out/bin
-          cp ${inputs."determinate-nixd-${system}"} $out/bin/determinate-nixd
-          chmod +x $out/bin/determinate-nixd
-          $out/bin/determinate-nixd --help
-        '';
-      });
+      packages = forEachSupportedSystem (
+        { system, pkgs, ... }:
+        {
+          default = pkgs.runCommand "determinate-nixd" { } ''
+            mkdir -p $out/bin
+            cp ${inputs."determinate-nixd-${system}"} $out/bin/determinate-nixd
+            chmod +x $out/bin/determinate-nixd
+            $out/bin/determinate-nixd --help
+          '';
+        }
+      );
 
-      devShells = forEachSupportedSystem ({ system, pkgs, ... }:
+      devShells = forEachSupportedSystem (
+        { system, pkgs, ... }:
         {
           default = pkgs.mkShell {
             name = "determinate-dev";
 
             packages = with pkgs; [
               lychee
-              nixpkgs-fmt
+              nixfmt-rfc-style
 
               (writeScriptBin "check-readme-links" ''
                 lychee README.md
               '')
             ];
           };
-        });
+        }
+      );
 
       # Stub for migration.
       darwinModules.default = ./modules/nix-darwin.nix;

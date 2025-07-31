@@ -26,6 +26,9 @@ jobs:
       - uses: DeterminateSystems/determinate-nix-action@main
       - uses: DeterminateSystems/flakehub-cache-action@main
 
+      - name: Check Nix formatting
+        run: git ls-files '*.nix' | nix develop --command xargs nixfmt --check
+
       - name: Check external links
         run: |
           nix develop --command \

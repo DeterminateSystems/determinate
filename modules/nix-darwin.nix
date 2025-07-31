@@ -1,4 +1,9 @@
-{ lib, options, config, ... }:
+{
+  lib,
+  options,
+  config,
+  ...
+}:
 let
   cfg = config.determinate;
 
@@ -15,7 +20,9 @@ let
 in
 {
   options.determinate = {
-    enable = lib.mkEnableOption "Determinate Nix" // { default = true; };
+    enable = lib.mkEnableOption "Determinate Nix" // {
+      default = true;
+    };
   };
 
   config = lib.mkIf cfg.enable (
