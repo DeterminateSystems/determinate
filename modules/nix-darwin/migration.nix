@@ -1,4 +1,9 @@
-{ lib, options, config, ... }:
+{
+  lib,
+  options,
+  config,
+  ...
+}:
 
 let
   cfg = config.determinate;
@@ -6,7 +11,7 @@ let
   postMigrationInstructions = ''
     You have successfully migrated your Determinate installation.
     Please remove `determinate.darwinModules.default` from your
-    nix-darwin configuration, and ensure that you have nix-darwin’s own
+    nix-darwin configuration, and ensure that you have nix-darwin's own
     Nix installation management disabled by setting:
 
         nix.enable = false;
@@ -16,7 +21,9 @@ let
 in
 {
   options.determinate = {
-    enable = lib.mkEnableOption "Determinate Nix" // { default = true; };
+    enable = lib.mkEnableOption "Determinate Nix" // {
+      default = true;
+    };
   };
 
   config = lib.mkIf cfg.enable (
@@ -56,7 +63,7 @@ in
         '';
 
         system.activationScripts.extraActivation.text = lib.mkBefore ''
-          # Hack: Make sure nix-darwin doesn’t clobber the Determinate
+          # Hack: Make sure nix-darwin doesn't clobber the Determinate
           # launchd daemons after they become unmanaged.
 
           determinateDaemonsStash=$(mktemp -d --suffix=determinate-daemons)

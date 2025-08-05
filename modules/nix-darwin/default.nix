@@ -1,36 +1,9 @@
-# This method of generating Nix configuration borrows heavily from the nix-darwin project:
-# https://github.com/nix-darwin/nix-darwin/blob/0d71cbf88d63e938b37b85b3bf8b238bcf7b39b9/modules/nix/default.nix
-
 { lib, ... }:
 
 let
   inherit (lib) types;
 
-  mkValueString =
-    v:
-    if v == null then
-      ""
-    else if builtins.isBool v then
-      lib.boolToString v
-    else if builtins.isInt v then
-      builtins.toString v
-    else if builtins.isFloat v then
-      lib.strings.floatToString v
-    else if builtins.isList v then
-      builtins.toJSON v
-    else if lib.isDerivation v then
-      builtins.toString v
-    else if builtins.isPath v then
-      builtins.toString v
-    else if builtins.isAttrs v then
-      builtins.toJSON v
-    else if builtins.isString v then
-      v
-    else if lib.strings.isCoercibleToString v then
-      builtins.toString v
-    else
-      abort "The Nix configuration value ${lib.generators.toPretty { } v} can't be encoded";
-  mkKeyValue = k: v: "${lib.escape [ "=" ] k} = ${mkValueString v}";
+  inherit (import ./config/config.nix { inherit lib; }) mkConfig;
 
   semanticConfType =
     with types;
@@ -86,7 +59,7 @@ in
         "# Update your custom settings by changing your nix-darwin configuration, not by modifying this file directly."
         ""
       ]
-      ++ lib.mapAttrsToList mkKeyValue config.determinate-nix.customSettings
+      ++ mkConfig config.determinate-nix.customSettings
     );
   };
 }
