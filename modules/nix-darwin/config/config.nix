@@ -36,5 +36,5 @@ let
   mkKeyValue = k: v: "${lib.escape [ "=" ] k} = ${mkValueString v}";
 in
 {
-  mkConfig = attrs: lib.mapAttrsToList mkKeyValue attrs;
+  mkCustomConfig = attrs: lib.mapAttrsToList mkKeyValue attrs;
 }

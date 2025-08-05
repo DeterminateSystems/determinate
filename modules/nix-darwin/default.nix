@@ -1,9 +1,9 @@
-{ lib, ... }:
+{ config, lib, ... }:
 
 let
   inherit (lib) types;
 
-  inherit (import ./config/config.nix { inherit lib; }) mkConfig;
+  inherit (import ./config/config.nix { inherit lib; }) mkCustomConfig;
 
   semanticConfType =
     with types;
@@ -59,7 +59,7 @@ in
         "# Update your custom settings by changing your nix-darwin configuration, not by modifying this file directly."
         ""
       ]
-      ++ mkConfig config.determinate-nix.customSettings
+      ++ mkCustomConfig config.determinate-nix.customSettings
     );
   };
 }
