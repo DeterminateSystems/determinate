@@ -2,6 +2,7 @@
 # https://github.com/nix-darwin/nix-darwin/blob/e04a388232d9a6ba56967ce5b53a8a6f713cdfcf/modules/nix/default.nix
 # We have included the LICENSE file for the nix-darwin project in this directory from the e04a388232d9a6ba56967ce5b53a8a6f713cdfcf revision of the project:
 # https://github.com/nix-darwin/nix-darwin/tree/e04a388232d9a6ba56967ce5b53a8a6f713cdfcf
+# https://github.com/nix-darwin/nix-darwin/blob/e04a388232d9a6ba56967ce5b53a8a6f713cdfcf/LICENSE
 
 { lib }:
 
