@@ -76,8 +76,14 @@
         }
       );
 
-      # Stub for migration.
-      darwinModules.default = ./modules/nix-darwin.nix;
+      formatter = forEachSupportedSystem ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
+
+      darwinModules = {
+        default = ./modules/nix-darwin/default.nix;
+
+        # In case we come across anyone who still needs to migrate
+        migration = ./modules/nix-darwin/migration.nix;
+      };
 
       nixosModules.default = import ./modules/nixos.nix inputs;
     };

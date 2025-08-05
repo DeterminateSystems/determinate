@@ -10,11 +10,11 @@ Determinate has two core components:
 
 You can get started with Determinate in one of two ways:
 
-| Situation                            | How to install                                                               |
-| :----------------------------------- | :--------------------------------------------------------------------------- |
-| **Linux** but not using [NixOS]      | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
-| **macOS**                            | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
-| **Linux** and using [NixOS]          | The [NixOS module](#nixos) provided by this flake                            |
+| Situation                       | How to install                                                               |
+| :------------------------------ | :--------------------------------------------------------------------------- |
+| **Linux** but not using [NixOS] | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **macOS**                       | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
+| **Linux** and using [NixOS]     | The [NixOS module](#nixos) provided by this flake                            |
 
 ## Installing using the Determinate Nix Installer
 
@@ -62,8 +62,73 @@ Here's an example NixOS configuration for the current stable NixOS:
 }
 ```
 
+## nix-darwin
+
+If you use [nix-darwin] to provide Nix-based configuration for your macOS system, you need to disable nix-darwin's built-in Nix configuration mechanisms by setting `nix.enable = false`; if not, Determinate Nix **does not work properly**.
+Here's an example nix-darwin configuration that would be compatible with Determinate Nix:
+
+```nix
+{
+  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0";
+  inputs.nix-darwin = {
+    url = "https://flakehub.com/f/nix-darwin/nix-darwin/0";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
+
+  outputs = { determinate, nixpkgs, ... }: {
+    darwinConfigurations."my-username-aarch64-darwin" = inputs.nix-darwin.lib.darwinSystem {
+      inherit system;
+      modules = [
+        ({ ... }: {
+          # Let Determinate Nix handle Nix configuration rather than nix-darwin
+          nix.enable = false;
+
+          # Other nix-darwin settings
+        })
+      ];
+    };
+  };
+}
+```
+
+While Determinate Nix creates and manages the standard `nix.conf` file for you, you can set custom configuration in the `/etc/nix/nix.custom.conf` file, which is explained in more detail [in our documentation][configuring-determinate-nix].
+If you'd like to set that custom configuration using nix-darwin, you can use this `determinate` flake for that.
+Here's an example nix-darwin configuration that writes custom settings:
+
+```nix
+{
+  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0";
+  inputs.nix-darwin = {
+    url = "https://flakehub.com/f/nix-darwin/nix-darwin/0";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
+
+  outputs = { determinate, nixpkgs, ... }: {
+    darwinConfigurations."my-username-aarch64-darwin" = inputs.nix-darwin.lib.darwinSystem {
+      inherit system;
+      modules = [
+        # Add the determinate nix-darwin module
+        inputs.determinate.darwinModules.default
+        ({ ... }: {
+          # Let Determinate Nix handle Nix configuration rather than nix-darwin
+          nix.enable = false;
+
+          # Custom settings written to /etc/nix/nix.custom.conf
+          determinate-nix.customSettings = {
+            flake-registry = "/etc/nix/flake-registry.json";
+          };
+        })
+      ];
+    };
+  };
+}
+```
+
 [actions]: https://github.com/features/actions
 [cache]: https://determinate.systems/posts/flakehub-cache-beta
+[configuring-determinate-nix]: https://docs.determinate.systems/determinate-nix#determinate-nix-configuration
 [det-nix]: https://determinate.systems/nix
 [detsys]: https://determinate.systems
 [dnixd]: https://docs.determinate.systems/determinate-nix#determinate-nixd
@@ -78,7 +143,7 @@ Here's an example NixOS configuration for the current stable NixOS:
 [netrc]: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 [nix]: https://zero-to-nix.com/concepts/nix
 [nix-conf]: https://nix.dev/manual/nix/latest/command-ref/conf-file
-[nix-darwin]: https://github.com/LnL7/nix-darwin
+[nix-darwin]: https://github.com/nix-darwin/nix-darwin
 [nixos]: https://zero-to-nix.com/concepts/nixos
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
 [pkg]: https://install.determinate.systems/determinate-pkg/stable/Universal
