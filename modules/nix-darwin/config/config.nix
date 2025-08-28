@@ -19,8 +19,20 @@ let
       builtins.toString v
     else if builtins.isFloat v then
       lib.strings.floatToString v
+    # Convert lists of strings like `["foo" "bar"]` into space-separated strings like `foo bar`
     else if builtins.isList v then
-      builtins.toJSON v
+      let
+        ensureStrings =
+          ls:
+          lib.forEach ls (
+            item:
+            if builtins.isString item then
+              item
+            else
+              throw "Expected all list items to be strings but got ${builtins.typeOf item} instead"
+          );
+      in
+      lib.concatStringsSep " " (ensureStrings v)
     else if lib.isDerivation v then
       builtins.toString v
     else if builtins.isPath v then
