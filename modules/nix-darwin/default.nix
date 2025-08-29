@@ -40,7 +40,7 @@ in
       # Support "free-form" options
       freeformType = semanticConfType;
     };
-    default = {};
+    default = { };
   };
 
   config = lib.mkIf (config.determinate-nix.customSettings != { }) {
