@@ -69,14 +69,13 @@ Here's an example nix-darwin configuration that would be compatible with Determi
 
 ```nix
 {
-  inputs.determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/0";
   inputs.nix-darwin = {
     url = "https://flakehub.com/f/nix-darwin/nix-darwin/0";
     inputs.nixpkgs.follows = "nixpkgs";
   };
   inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
 
-  outputs = { determinate, nixpkgs, ... }: {
+  outputs = { nixpkgs, ... }: {
     darwinConfigurations."my-username-aarch64-darwin" = inputs.nix-darwin.lib.darwinSystem {
       inherit system;
       modules = [
