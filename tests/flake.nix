@@ -37,9 +37,27 @@
           system = "aarch64-darwin";
 
           modules = [
+            determinate.darwinModules.default
             {
               nix.enable = false;
               system.stateVersion = 5;
+            }
+          ];
+        }).system;
+
+      checks.aarch64-darwin.nix-darwin-custom-config =
+        (nix-darwin.lib.darwinSystem {
+          system = "aarch64-darwin";
+
+          modules = [
+            determinate.darwinModules.default
+            {
+              nix.enable = false;
+              system.stateVersion = 5;
+              determinate-nix.customSettings = {
+                extra-experimental-features = [ "build-time-fetch-tree" ];
+                flake-registry = "/etc/nix/flake-registry.json";
+              };
             }
           ];
         }).system;
