@@ -64,7 +64,7 @@ Here's an example NixOS configuration for the current stable NixOS:
 
 ## nix-darwin
 
-If you use [nix-darwin] to provide Nix-based configuration for your macOS system, you need to disable nix-darwin's built-in Nix configuration mechanisms by applying the `determinate` nix-darwin module and setting `determinate-nix.enable = true`; if not, Determinate Nix **does not work properly**.
+If you use [nix-darwin] to provide Nix-based configuration for your macOS system, you need to disable nix-darwin's built-in Nix configuration mechanisms by applying the `determinate` nix-darwin module and setting `determinateNix.enable = true`; if not, Determinate Nix **does not work properly**.
 Here's an example nix-darwin configuration that would be compatible with Determinate Nix:
 
 ```nix
@@ -86,7 +86,7 @@ Here's an example nix-darwin configuration that would be compatible with Determi
         # Configure the determinate module
         ({ ... }: {
           # Let Determinate Nix handle Nix configuration rather than nix-darwin
-          determinate-nix = {
+          determinateNix = {
             enable = true;
 
             # Other settings
@@ -121,7 +121,7 @@ Here's an example nix-darwin configuration that writes custom settings:
 
         # Configure the determinate module
         ({ ... }: {
-          determinate-nix = {
+          determinateNix = {
             # Enable Determinate Nix to handle your Nix configuration rather than nix-darwin
             enable = true;
             # Custom settings written to /etc/nix/nix.custom.conf
