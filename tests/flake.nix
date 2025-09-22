@@ -39,7 +39,7 @@
           modules = [
             determinate.darwinModules.default
             {
-              nix.enable = false;
+              determinate-nix.enable = true;
               system.stateVersion = 5;
             }
           ];
@@ -52,11 +52,13 @@
           modules = [
             determinate.darwinModules.default
             {
-              nix.enable = false;
-              system.stateVersion = 5;
-              determinate-nix.customSettings = {
-                extra-experimental-features = [ "build-time-fetch-tree" ];
-                flake-registry = "/etc/nix/flake-registry.json";
+              determinate-nix = {
+                enable = true;
+                settings = {
+                  auto-optimise-store = true;
+                  extra-experimental-features = [ "build-time-fetch-tree" ];
+                  flake-registry = "/etc/nix/flake-registry.json";
+                };
               };
             }
           ];
