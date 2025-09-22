@@ -593,7 +593,7 @@ in
 
       launchd.daemons.linux-builder = {
         environment = {
-          inherit (cfg.environment.variables) NIX_SSL_CERT_FILE;
+          NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-certificates.crt";
         };
 
         # create-builder uses TMPDIR to share files with the builder, notably certs.
@@ -635,7 +635,7 @@ in
           sshUser = "builder";
           sshKey = "/etc/nix/builder_ed25519";
           publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
-          inherit (cfg)
+          inherit (nixpkgsLinuxBuilderCfg)
             mandatoryFeatures
             maxJobs
             protocol
