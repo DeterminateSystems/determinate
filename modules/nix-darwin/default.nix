@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.determinate-nix;
@@ -7,7 +12,13 @@ let
     all
     concatMapStrings
     concatStringsSep
+    filterAttrs
     hasAttr
+    literalExpression
+    mapAttrsToList
+    mkDefault
+    mkEnableOption
+    mkForce
     mkIf
     mkMerge
     mkOption
@@ -532,18 +543,9 @@ in
               '';
             };
 
-            substituters = mkOption {
-              type = types.listOf types.str;
-              description = ''
-                List of binary cache URLs used to obtain pre-built binaries
-                of Nix packages.
-
-                By default,  https://cache.nixos.org/ is added.
-              '';
-            };
-
             trusted-users = mkOption {
               type = types.listOf types.str;
+              inherit (managedDefault "determinate-nix.trusted-users" [ ]) default defaultText;
               example = [
                 "root"
                 "alice"
