@@ -27,28 +27,61 @@ let
   disallowedOptions = [
     "always-allow-substitutes"
     "bash-prompt-prefix"
+    "external-builders"
+    "extra-nix-path"
     "netrc-file"
     "ssl-cert-file"
     "upgrade-nix-store-path-url"
   ];
 in
 {
-  options.determinate-nix.customSettings = lib.mkOption {
-    type = types.submodule {
-      options = { };
+  options = {
+    determinate-nix = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Whether to enable configuring Determinate Nix via nix-darwin.
 
-      # Support "free-form" options
-      freeformType = semanticConfType;
+          Disabling this stops nix-darwin from managing:
+
+          1. Custom Determinate Nix settings in {file}`/etc/nix/nix.custom.conf`.
+          2. Remote Nix builders
+          3.
+
+
+          This allows you to use nix-darwin without it taking over your
+          system installation of Nix. Some nix-darwin functionality
+          that relies on managing the Nix installation, like the
+          `nix.*` options to adjust Nix settings or configure a Linux
+          builder, will be unavailable. You will also have to upgrade
+          Nix yourself, as nix-darwin will no longer do so.
+
+          ::: {.warning}
+          If you have already removed your global system installation
+          of Nix, this will break nix-darwin and you will have to
+          reinstall Nix to fix it.
+          :::
+        '';
+      };
+
+      settings = lib.mkOption {
+        type = types.submodule {
+          freeformType = semanticConfType;
+
+          options = { };
+        };
+        default = { };
+      };
     };
-    default = { };
   };
 
-  config = lib.mkIf (config.determinate-nix.customSettings != { }) {
+  config = mkIf (config.nix.enable) {
     assertions = [
       {
         assertion = lib.all (key: !lib.hasAttr key config.determinate-nix.customSettings) disallowedOptions;
         message = ''
-          These settings are not allowed in `determinate-nix.customSettings`:
+          These settings are not allowed in `nix.settings`:
             ${lib.concatStringsSep ", " disallowedOptions}
         '';
       }
@@ -60,7 +93,7 @@ in
         "# Update your custom settings by changing your nix-darwin configuration, not by modifying this file directly."
         ""
       ]
-      ++ mkCustomConfig config.determinate-nix.customSettings
+      ++ mkCustomConfig config.determinate-nix.settings
     );
   };
 }
