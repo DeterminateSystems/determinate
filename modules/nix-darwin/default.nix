@@ -1,7 +1,14 @@
 { config, lib, ... }:
 
 let
-  inherit (lib) types;
+  inherit (lib)
+    all
+    concatMapStrings
+    concatStringsSep
+    hasAttr
+    mkOption
+    types
+    ;
 
   inherit (import ./config/config.nix { inherit lib; }) mkCustomConfig;
 
@@ -37,8 +44,8 @@ in
 {
   options = {
     determinate-nix = {
-      enable = lib.mkOption {
-        type = lib.types.bool;
+      enable = mkOption {
+        type = types.bool;
         default = true;
         description = ''
           Whether to enable configuring Determinate Nix via nix-darwin.
@@ -47,29 +54,388 @@ in
 
           1. Custom Determinate Nix settings in {file}`/etc/nix/nix.custom.conf`.
           2. Remote Nix builders
-          3.
-
-
-          This allows you to use nix-darwin without it taking over your
-          system installation of Nix. Some nix-darwin functionality
-          that relies on managing the Nix installation, like the
-          `nix.*` options to adjust Nix settings or configure a Linux
-          builder, will be unavailable. You will also have to upgrade
-          Nix yourself, as nix-darwin will no longer do so.
-
-          ::: {.warning}
-          If you have already removed your global system installation
-          of Nix, this will break nix-darwin and you will have to
-          reinstall Nix to fix it.
-          :::
+          3. A local Linux builder (distinct from Determinate Nix's native Linux builder).
         '';
       };
 
-      settings = lib.mkOption {
+      buildMachines = mkOption {
+        type = types.listOf (
+          types.submodule {
+            options = {
+              hostName = mkOption {
+                type = types.str;
+                example = "nixbuilder.example.org";
+                description = ''
+                  The hostname of the build machine.
+                '';
+              };
+              protocol = mkOption {
+                type = types.enum [
+                  null
+                  "ssh"
+                  "ssh-ng"
+                ];
+                default = "ssh";
+                example = "ssh-ng";
+                description = ''
+                  The protocol used for communicating with the build machine.
+                  Use `ssh-ng` if your remote builder and your
+                  local Nix version support that improved protocol.
+
+                  Use `null` when trying to change the special localhost builder
+                  without a protocol which is for example used by hydra.
+                '';
+              };
+              system = mkOption {
+                type = types.nullOr types.str;
+                default = null;
+                example = "x86_64-linux";
+                description = ''
+                  The system type the build machine can execute derivations on.
+                  Either this attribute or {var}`systems` must be
+                  present, where {var}`system` takes precedence if
+                  both are set.
+                '';
+              };
+              systems = mkOption {
+                type = types.listOf types.str;
+                default = [ ];
+                example = [
+                  "x86_64-linux"
+                  "aarch64-linux"
+                ];
+                description = ''
+                  The system types the build machine can execute derivations on.
+                  Either this attribute or {var}`system` must be
+                  present, where {var}`system` takes precedence if
+                  both are set.
+                '';
+              };
+              sshUser = mkOption {
+                type = types.nullOr types.str;
+                default = null;
+                example = "builder";
+                description = ''
+                  The username to log in as on the remote host. This user must be
+                  able to log in and run nix commands non-interactively. It must
+                  also be privileged to build derivations, so must be included in
+                  {option}`nix.settings.trusted-users`.
+                '';
+              };
+              sshKey = mkOption {
+                type = types.nullOr types.str;
+                default = null;
+                example = "/root/.ssh/id_buildhost_builduser";
+                description = ''
+                  The path to the SSH private key with which to authenticate on
+                  the build machine. The private key must not have a passphrase.
+                  If null, the building user (root on NixOS machines) must have an
+                  appropriate ssh configuration to log in non-interactively.
+
+                  Note that for security reasons, this path must point to a file
+                  in the local filesystem, *not* to the nix store.
+                '';
+              };
+              maxJobs = mkOption {
+                type = types.int;
+                default = 1;
+                description = ''
+                  The number of concurrent jobs the build machine supports. The
+                  build machine will enforce its own limits, but this allows hydra
+                  to schedule better since there is no work-stealing between build
+                  machines.
+                '';
+              };
+              speedFactor = mkOption {
+                type = types.int;
+                default = 1;
+                description = ''
+                  The relative speed of this builder. This is an arbitrary integer
+                  that indicates the speed of this builder, relative to other
+                  builders. Higher is faster.
+                '';
+              };
+              mandatoryFeatures = mkOption {
+                type = types.listOf types.str;
+                default = [ ];
+                example = [ "big-parallel" ];
+                description = ''
+                  A list of features mandatory for this builder. The builder will
+                  be ignored for derivations that don't require all features in
+                  this list. All mandatory features are automatically included in
+                  {var}`supportedFeatures`.
+                '';
+              };
+              supportedFeatures = mkOption {
+                type = types.listOf types.str;
+                default = [ ];
+                example = [
+                  "kvm"
+                  "big-parallel"
+                ];
+                description = ''
+                  A list of features supported by this builder. The builder will
+                  be ignored for derivations that require features not in this
+                  list.
+                '';
+              };
+              publicHostKey = mkOption {
+                type = types.nullOr types.str;
+                default = null;
+                description = ''
+                  The (base64-encoded) public host key of this builder. The field
+                  is calculated via {command}`base64 -w0 /etc/ssh/ssh_host_type_key.pub`.
+                  If null, SSH will use its regular known-hosts file when connecting.
+                '';
+              };
+            };
+          }
+        );
+        inherit (managedDefault "determinate-nix.buildMachines" [ ]) default defaultText;
+        description = ''
+          This option lists the machines to be used if distributed builds are
+          enabled (see {option}`nix.distributedBuilds`).
+          Nix will perform derivations on those machines via SSH by copying the
+          inputs to the Nix store on the remote machine, starting the build,
+          then copying the output back to the local Nix store.
+        '';
+      };
+
+      distributedBuilds = mkOption {
+        type = types.bool;
+        inherit (managedDefault "determinate-nix.distributedBuilds" false) default defaultText;
+        description = ''
+          Whether to distribute builds to the machines listed in
+          {option}`determinate-nix.buildMachines`.
+        '';
+      };
+
+      nixpkgs-linux-builder =
+        let
+          cfg = config.determinate-nix.nixpkgs-linux-builder;
+        in
+        {
+          enable = mkEnableOption "Nixpkgs Linux builder (distinct from Determinate Nix's native Linux builder)";
+
+          package = mkOption {
+            type = types.package;
+            default = pkgs.darwin.linux-builder;
+            defaultText = "pkgs.darwin.linux-builder";
+            apply =
+              pkg:
+              pkg.override (old: {
+                # the linux-builder package requires `modules` as an argument, so it's
+                # always non-null.
+                modules = old.modules ++ [ cfg.config ];
+              });
+            description = ''
+              This option specifies the non-native Linux builder to use.
+            '';
+          };
+
+          config = mkOption {
+            type = types.deferredModule;
+            default = { };
+            example = literalExpression ''
+              ({ pkgs, ... }:
+
+              {
+                environment.systemPackages = [ pkgs.neovim ];
+              })
+            '';
+            description = ''
+              This option specifies extra NixOS configuration for the Nixpkgs Linux builder.
+              You should first use the Nixpkgs Linux builder without changing the builder configuration, otherwise you may not be able to build the Linux builder (unless you're using the native Linux builder).
+            '';
+          };
+
+          ephemeral = mkEnableOption ''
+            wipe the builder's filesystem on every restart.
+
+            This is disabled by default as maintaining the builder's Nix Store reduces
+            rebuilds. You can enable this if you don't want your builder to accumulate
+            state.
+          '';
+
+          mandatoryFeatures = mkOption {
+            type = types.listOf types.str;
+            default = [ ];
+            defaultText = literalExpression ''[]'';
+            example = literalExpression ''[ "big-parallel" ]'';
+            description = ''
+              A list of features mandatory for the Nixpkgs Linux builder. The builder is
+              ignored for derivations that don't require all features in
+              this list. All mandatory features are automatically included in
+              {var}`supportedFeatures`.
+
+              This sets the corresponding `determinate-nix.buildMachines.*.mandatoryFeatures` option.
+            '';
+          };
+
+          maxJobs = mkOption {
+            type = types.ints.positive;
+            default = cfg.package.nixosConfig.virtualisation.cores;
+            defaultText = ''
+              The `virtualisation.cores` of the build machine's final NixOS configuration.
+            '';
+            example = 2;
+            description = ''
+              Instead of setting this directly, you should set
+              {option}`determinate-nix.linux-builder.config.virtualisation.cores` to configure
+              the amount of cores the Linux builder should have.
+
+              The number of concurrent jobs the Linux builder machine supports. The
+              build machine will enforce its own limits, but this allows hydra
+              to schedule better since there is no work-stealing between build
+              machines.
+
+              This sets the corresponding `determinate-nix.buildMachines.*.maxJobs` option.
+            '';
+          };
+
+          protocol = mkOption {
+            type = types.str;
+            default = "ssh-ng";
+            defaultText = literalExpression ''"ssh-ng"'';
+            example = literalExpression ''"ssh"'';
+            description = ''
+              The protocol used for communicating with the build machine.  Use
+              `ssh-ng` if your remote builder and your local Nix version support that
+              improved protocol.
+
+              Use `null` when trying to change the special localhost builder without a
+              protocol which is for example used by hydra.
+            '';
+          };
+
+          speedFactor = mkOption {
+            type = types.ints.positive;
+            default = 1;
+            defaultText = literalExpression ''1'';
+            description = ''
+              The relative speed of the Nixpkgs Linux builder. This is an arbitrary integer
+              that indicates the speed of this builder, relative to other
+              builders. Higher is faster.
+
+              This sets the corresponding `determinate-nix.buildMachines.*.speedFactor` option.
+            '';
+          };
+
+          supportedFeatures = mkOption {
+            type = types.listOf types.str;
+            default = [
+              "kvm"
+              "benchmark"
+              "big-parallel"
+            ];
+            defaultText = literalExpression ''[ "kvm" "benchmark" "big-parallel" ]'';
+            example = literalExpression ''[ "kvm" "big-parallel" ]'';
+            description = ''
+              A list of features supported by the Nixpkgs Linux builder. The builder will
+              be ignored for derivations that require features not in this
+              list.
+
+              This sets the corresponding `determinate-nix.buildMachines.*.supportedFeatures` option.
+            '';
+          };
+
+          systems = mkOption {
+            type = types.listOf types.str;
+            default = [ cfg.package.nixosConfig.nixpkgs.hostPlatform.system ];
+            defaultText = ''
+              The `nixpkgs.hostPlatform.system` of the build machine's final NixOS configuration.
+            '';
+            example = literalExpression ''
+              [
+                "x86_64-linux"
+                "aarch64-linux"
+              ]
+            '';
+            description = ''
+              This option specifies system types the build machine can execute derivations on.
+
+              This sets the corresponding `nix.buildMachines.*.systems` option.
+            '';
+          };
+
+          workingDirectory = mkOption {
+            type = types.str;
+            default = "/var/lib/linux-builder";
+            description = ''
+              The working directory of the Linux builder daemon process.
+            '';
+          };
+        };
+
+      settings = mkOption {
         type = types.submodule {
           freeformType = semanticConfType;
 
-          options = { };
+          options = {
+            auto-optimise-store = mkOption {
+              type = types.bool;
+              default = false;
+              example = true;
+              description = ''
+                If set to `true`, Determinate Nix automatically detects files in the store
+                that have identical contents and replaces them with hard links to a single copy.
+                This saves disk space. If set to `false` (the default), you can enable
+                {option}`determinate-nix.optimise.automatic` to run {command}`nix-store --optimise`
+                periodically to get rid of duplicate files. You can also run
+                {command}`nix-store --optimise` manually.
+              '';
+            };
+
+            cores = mkOption {
+              type = types.int;
+              default = 0;
+              example = 64;
+              description = ''
+                This option defines the maximum number of concurrent tasks during
+                one build. It affects, e.g., -j option for make.
+                The special value 0 means that the builder should use all
+                available CPU cores in the system. Some builds may become
+                non-deterministic with this option; use with care! Packages will
+                only be affected if enableParallelBuilding is set for them.
+              '';
+            };
+
+            extra-sandbox-paths = mkOption {
+              type = types.listOf types.str;
+              default = [ ];
+              example = [
+                "/dev"
+                "/proc"
+              ];
+              description = ''
+                Directories from the host filesystem to be included
+                in the sandbox.
+              '';
+            };
+
+            sandbox = mkOption {
+              type = types.either types.bool (types.enum [ "relaxed" ]);
+              default = false;
+              description = ''
+                If set, Nix performs builds in a sandboxed environment that it
+                sets up automatically for each build. This prevents impurities
+                in builds by disallowing access to dependencies outside of the Nix
+                store by using network and mount namespaces in a chroot environment. It
+                doesn't affect derivation hashes, so changing this option doesn't cause
+                Nix to trigger a rebuild of packages.
+              '';
+            };
+
+            substituters = mkOption {
+              type = types.listOf types.str;
+              description = ''
+                List of binary cache URLs used to obtain pre-built binaries
+                of Nix packages.
+
+                By default https://cache.nixos.org/ is added.
+              '';
+            };
+          };
         };
         default = { };
       };
@@ -79,15 +445,24 @@ in
   config = mkIf (config.nix.enable) {
     assertions = [
       {
-        assertion = lib.all (key: !lib.hasAttr key config.determinate-nix.customSettings) disallowedOptions;
+        assertion = all (key: !hasAttr key config.determinate-nix.settings) disallowedOptions;
         message = ''
           These settings are not allowed in `nix.settings`:
-            ${lib.concatStringsSep ", " disallowedOptions}
+            ${concatStringsSep ", " disallowedOptions}
         '';
       }
     ];
 
-    environment.etc."nix/nix.custom.conf".text = lib.concatStringsSep "\n" (
+    warnings = [
+      (mkIf (
+        !cfg.distributedBuilds && cfg.buildMachines != [ ]
+      ) "determinate-nix.distributedBuilds is not enabled, thus build machines aren't configured.")
+    ];
+
+    # Disable nix-darwin's internal mechanisms for handling Nix configuration
+    nix.enable = mkForce false;
+
+    environment.etc."nix/nix.custom.conf".text = concatStringsSep "\n" (
       [
         "# This custom configuration file for Determinate Nix is generated by the determinate module for nix-darwin."
         "# Update your custom settings by changing your nix-darwin configuration, not by modifying this file directly."
@@ -95,5 +470,47 @@ in
       ]
       ++ mkCustomConfig config.determinate-nix.settings
     );
+
+    # List of machines for distributed Nix builds in the format
+    # expected by build-remote.pl.
+    environment.etc."nix/machines" = mkIf (cfg.buildMachines != [ ]) {
+      text = concatMapStrings (
+        machine:
+        (concatStringsSep " " ([
+          "${optionalString (machine.protocol != null) "${machine.protocol}://"}${
+            optionalString (machine.sshUser != null) "${machine.sshUser}@"
+          }${machine.hostName}"
+          (
+            if machine.system != null then
+              machine.system
+            else if machine.systems != [ ] then
+              concatStringsSep "," machine.systems
+            else
+              "-"
+          )
+          (if machine.sshKey != null then machine.sshKey else "-")
+          (toString machine.maxJobs)
+          (toString machine.speedFactor)
+          (
+            let
+              res = (machine.supportedFeatures ++ machine.mandatoryFeatures);
+            in
+            if (res == [ ]) then "-" else (concatStringsSep "," res)
+          )
+          (
+            let
+              res = machine.mandatoryFeatures;
+            in
+            if (res == [ ]) then "-" else (concatStringsSep "," machine.mandatoryFeatures)
+          )
+          (if machine.publicHostKey != null then machine.publicHostKey else "-")
+        ]))
+        + "\n"
+      ) cfg.buildMachines;
+    };
+
+    determinate-nix.settings = mkMerge [
+      (mkIf (!cfg.distributedBuilds) { builders = null; })
+    ];
   };
 }
