@@ -81,8 +81,7 @@ in
         default = true;
         description = ''
           Whether to enable configuring Determinate Nix via nix-darwin.
-
-          Disabling this stops nix-darwin from managing:
+          If you set `enable` to `true`, this module prevents nix-darwin from managing:
 
           1. Custom Determinate Nix settings in {file}`/etc/${customConfFile}`.
           2. Remote Nix builders
