@@ -393,6 +393,84 @@ in
           };
         };
 
+      registry = mkOption {
+        type = types.attrsOf (
+          types.submodule (
+            let
+              referenceAttrs =
+                with types;
+                attrsOf (oneOf [
+                  str
+                  int
+                  bool
+                  package
+                ]);
+            in
+            { config, name, ... }:
+            {
+              options = {
+                from = mkOption {
+                  type = referenceAttrs;
+                  example = {
+                    type = "indirect";
+                    id = "nixpkgs";
+                  };
+                  description = "The flake reference to be rewritten.";
+                };
+                to = mkOption {
+                  type = referenceAttrs;
+                  example = {
+                    type = "github";
+                    owner = "my-org";
+                    repo = "my-nixpkgs";
+                  };
+                  description = "The flake reference {option}`from` is rewritten to.";
+                };
+                flake = mkOption {
+                  type = types.nullOr types.attrs;
+                  default = null;
+                  example = literalExpression "nixpkgs";
+                  description = ''
+                    The flake input {option}`from` is rewritten to.
+                  '';
+                };
+                exact = mkOption {
+                  type = types.bool;
+                  default = true;
+                  description = ''
+                    Whether the {option}`from` reference needs to match exactly. If set,
+                    a {option}`from` reference like `nixpkgs` does not
+                    match with a reference like `nixpkgs/nixos-20.03`.
+                  '';
+                };
+              };
+              config = {
+                from = mkDefault {
+                  type = "indirect";
+                  id = name;
+                };
+                to = mkIf (config.flake != null) (
+                  mkDefault (
+                    {
+                      type = "path";
+                      path = config.flake.outPath;
+                    }
+                    // filterAttrs (
+                      n: _: n == "lastModified" || n == "rev" || n == "revCount" || n == "narHash"
+                    ) config.flake
+                  )
+                );
+              };
+            }
+          )
+        );
+        inherit (managedDefault "nix.registry" { }) default defaultText;
+        description = ''
+          The system-wide flake registry. We recommend using the registry only for CLI commands, such as
+          `nix search nixpkgs ponysay` or `nix build nixpkgs#cowsay`, and not for flake references in Nix code.
+        '';
+      };
+
       settings = mkOption {
         type = types.submodule {
           freeformType = semanticConfType;
@@ -601,6 +679,14 @@ in
 
       # Set up the environment variables for running Nix
       environment.variables = cfg.envVars;
+
+      # Create the Nix flake registry
+      environment.etc."nix/registry.json" = mkIf (config.registry != [ ]) {
+        text = builtins.toJSON {
+          version = 2;
+          flakes = mapAttrsToList (n: v: { inherit (v) from to exact; }) cfg.registry;
+        };
+      };
 
       # List of machines for distributed Nix builds in the format
       # expected by build-remote.pl.
