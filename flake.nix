@@ -66,7 +66,7 @@
 
             packages = with pkgs; [
               lychee
-              nixfmt-rfc-style
+              self.formatter.${system}
 
               (writeScriptBin "check-readme-links" ''
                 lychee README.md
@@ -76,7 +76,7 @@
         }
       );
 
-      formatter = forEachSupportedSystem ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
+      formatter = forEachSupportedSystem ({ pkgs, ... }: pkgs.nixfmt);
 
       darwinModules = {
         default = ./modules/nix-darwin/default.nix;
