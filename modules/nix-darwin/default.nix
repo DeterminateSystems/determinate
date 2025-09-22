@@ -6,7 +6,10 @@ let
     concatMapStrings
     concatStringsSep
     hasAttr
+    mkIf
+    mkMerge
     mkOption
+    optionalString
     types
     ;
 
@@ -40,6 +43,18 @@ let
     "ssl-cert-file"
     "upgrade-nix-store-path-url"
   ];
+
+  managedDefault = name: default: {
+    default =
+      if config.determinate-nix.enable then
+        default
+      else
+        throw ''
+          ${name}: accessed when `determinate-nix.enable` is off; this is a bug in
+          nix-darwin or a third-party module
+        '';
+    defaultText = default;
+  };
 
   # Various constant values
   customConfFile = "nix/nix.custom.conf";
@@ -194,7 +209,7 @@ in
             };
           }
         );
-        inherit (managedDefault "determinate-nix.buildMachines" [ ]) default defaultText;
+        default = [ ];
         description = ''
           This option lists the machines to be used if distributed builds are
           enabled (see {option}`nix.distributedBuilds`).
@@ -206,16 +221,24 @@ in
 
       distributedBuilds = mkOption {
         type = types.bool;
-        inherit (managedDefault "determinate-nix.distributedBuilds" false) default defaultText;
+        inherit (managedDefault "nix.distributedBuilds" false) default defaultText;
         description = ''
           Whether to distribute builds to the machines listed in
           {option}`determinate-nix.buildMachines`.
         '';
       };
 
+      # Environment variables for running Nix.
+      envVars = mkOption {
+        type = types.attrs;
+        internal = true;
+        inherit (managedDefault "nix.envVars" { }) default defaultText;
+        description = "Environment variables used by Nix.";
+      };
+
       nixpkgs-linux-builder =
         let
-          cfg = config.determinate-nix.nixpkgs-linux-builder;
+          linuxBuilderCfg = config.determinate-nix.nixpkgs-linux-builder;
         in
         {
           enable = mkEnableOption "Nixpkgs Linux builder (distinct from Determinate Nix's native Linux builder)";
@@ -229,7 +252,7 @@ in
               pkg.override (old: {
                 # the linux-builder package requires `modules` as an argument, so it's
                 # always non-null.
-                modules = old.modules ++ [ cfg.config ];
+                modules = old.modules ++ [ linuxBuilderCfg.config ];
               });
             description = ''
               This option specifies the non-native Linux builder to use.
@@ -277,7 +300,7 @@ in
 
           maxJobs = mkOption {
             type = types.ints.positive;
-            default = cfg.package.nixosConfig.virtualisation.cores;
+            default = linuxBuilderCfg.package.nixosConfig.virtualisation.cores;
             defaultText = ''
               The `virtualisation.cores` of the build machine's final NixOS configuration.
             '';
@@ -344,7 +367,7 @@ in
 
           systems = mkOption {
             type = types.listOf types.str;
-            default = [ cfg.package.nixosConfig.nixpkgs.hostPlatform.system ];
+            default = [ linuxBuilderCfg.package.nixosConfig.nixpkgs.hostPlatform.system ];
             defaultText = ''
               The `nixpkgs.hostPlatform.system` of the build machine's final NixOS configuration.
             '';
@@ -465,14 +488,14 @@ in
 
   config = mkIf (config.determinate-nix.enable) (mkMerge [
     # Nixpkgs Linux builder not enabled
-    (mkIf (!cfg.nixpkgs-linux-builder.enable) {
+    (mkIf (!config.nixpkgs-linux-builder.enable) {
       system.activationScripts.preActivation.text = ''
-        rm -rf ${cfg.nixpkgs-linux-builder.workingDirectory}
+        rm -rf ${config.nixpkgs-linux-builder.workingDirectory}
       '';
     })
 
     # Nixpkgs Linux builder enabled
-    (mkIf (cfg.nixpkgs-linux-builder.enable) {
+    (mkIf (config.nixpkgs-linux-builder.enable) {
       assertions = [
         {
           assertion = config.determinate-nix.enable;
@@ -482,11 +505,11 @@ in
 
       system.activationScripts.preActivation.text = ''
         # Migrate if using the old working directory
-        if [ -e /var/lib/darwin-builder ] && [ ! -e ${cfg.nixpkgs-linux-builder.workingDirectory} ]; then
-          mv /var/lib/darwin-builder ${cfg.nixpkgs-linux-builder.workingDirectory}
+        if [ -e /var/lib/darwin-builder ] && [ ! -e ${config.nixpkgs-linux-builder.workingDirectory} ]; then
+          mv /var/lib/darwin-builder ${config.nixpkgs-linux-builder.workingDirectory}
         fi
 
-        mkdir -p ${cfg.nixpkgs-linux-builder.workingDirectory}
+        mkdir -p ${config.nixpkgs-linux-builder.workingDirectory}
       '';
 
       launchd.daemons.linux-builder = {
@@ -503,16 +526,16 @@ in
           rm -rf $TMPDIR
           mkdir -p $TMPDIR
           trap "rm -rf $TMPDIR" EXIT
-          ${lib.optionalString cfg.ephemeral ''
-            rm -f ${cfg.workingDirectory}/${cfg.package.nixosConfig.networking.hostName}.qcow2
+          ${optionalString config.nixpkgs-linux-builder.ephemeral ''
+            rm -f ${config.nixpkgs-linux-builder.workingDirectory}/${config.nixpkgs-linux-builder.package.nixosConfig.networking.hostName}.qcow2
           ''}
-          ${cfg.package}/bin/create-builder
+          ${config.nixpkgs-linux-builder.package}/bin/create-builder
         '';
 
         serviceConfig = {
           KeepAlive = true;
           RunAtLoad = true;
-          WorkingDirectory = cfg.workingDirectory;
+          WorkingDirectory = config.nixpkgs-linux-builder.workingDirectory;
         };
       };
 
@@ -560,7 +583,7 @@ in
 
       warnings = [
         (mkIf (
-          !cfg.distributedBuilds && cfg.buildMachines != [ ]
+          !config.distributedBuilds && config.buildMachines != [ ]
         ) "determinate-nix.distributedBuilds is not enabled, thus build machines aren't configured.")
       ];
 
@@ -578,7 +601,7 @@ in
 
       # List of machines for distributed Nix builds in the format
       # expected by build-remote.pl.
-      environment.etc."nix/machines" = mkIf (cfg.buildMachines != [ ]) {
+      environment.etc."nix/machines" = mkIf (config.buildMachines != [ ]) {
         text = concatMapStrings (
           machine:
           (concatStringsSep " " ([
@@ -611,11 +634,11 @@ in
             (if machine.publicHostKey != null then machine.publicHostKey else "-")
           ]))
           + "\n"
-        ) cfg.buildMachines;
+        ) config.buildMachines;
       };
 
       determinate-nix.settings = mkMerge [
-        (mkIf (!cfg.distributedBuilds) { builders = null; })
+        (mkIf (!config.distributedBuilds) { builders = null; })
       ];
     }
   ]);
