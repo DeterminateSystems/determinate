@@ -6,8 +6,8 @@
 }:
 
 let
-  cfg = config.determinate-nix;
-  nixpkgsLinuxBuilderCfg = cfg.nixpkgs-linux-builder;
+  cfg = config.determinateNix;
+  nixpkgsLinuxBuilderCfg = cfg.nixpkgsLinuxBuilder;
 
   inherit (lib)
     all
@@ -64,7 +64,7 @@ let
         default
       else
         throw ''
-          ${name}: accessed when `determinate-nix.enable` is off; this is a bug in
+          ${name}: accessed when `determinateNix.enable` is off; this is a bug in
           nix-darwin or a third-party module
         '';
     defaultText = default;
@@ -72,10 +72,11 @@ let
 
   # Various constant values
   customConfFile = "nix/nix.custom.conf";
+  registryFile = "nix/registry.json";
 in
 {
   options = {
-    determinate-nix = {
+    determinateNix = {
       enable = mkOption {
         type = types.bool;
         default = true;
@@ -150,7 +151,7 @@ in
                   The username to log in as on the remote host. This user must be
                   able to log in and run nix commands non-interactively. It must
                   also be privileged to build derivations, so must be included in
-                  {option}`determinate-nix.settings.trusted-users`.
+                  {option}`determinateNix.settings.trusted-users`.
                 '';
               };
               sshKey = mkOption {
@@ -225,7 +226,7 @@ in
         default = [ ];
         description = ''
           This option lists the machines to be used if distributed builds are
-          enabled (see {option}`determinate-nix.distributedBuilds`).
+          enabled (see {option}`determinateNix.distributedBuilds`).
           Nix will perform derivations on those machines via SSH by copying the
           inputs to the Nix store on the remote machine, starting the build,
           then copying the output back to the local Nix store.
@@ -234,10 +235,10 @@ in
 
       distributedBuilds = mkOption {
         type = types.bool;
-        inherit (managedDefault "determinate-nix.distributedBuilds" false) default defaultText;
+        inherit (managedDefault "determinateNix.distributedBuilds" false) default defaultText;
         description = ''
           Whether to distribute builds to the machines listed in
-          {option}`determinate-nix.buildMachines`.
+          {option}`determinateNix.buildMachines`.
         '';
       };
 
@@ -245,11 +246,11 @@ in
       envVars = mkOption {
         type = types.attrs;
         internal = true;
-        inherit (managedDefault "determinate-nix.envVars" { }) default defaultText;
+        inherit (managedDefault "determinateNix.envVars" { }) default defaultText;
         description = "Environment variables used by Nix.";
       };
 
-      nixpkgs-linux-builder = {
+      nixpkgsLinuxBuilder = {
         enable = mkEnableOption "Nixpkgs Linux builder (distinct from Determinate Nix's native Linux builder)";
 
         package = mkOption {
@@ -303,7 +304,7 @@ in
             this list. All mandatory features are automatically included in
             {var}`supportedFeatures`.
 
-            This sets the corresponding `determinate-nix.buildMachines.*.mandatoryFeatures` option.
+            This sets the corresponding `determinateNix.buildMachines.*.mandatoryFeatures` option.
           '';
         };
 
@@ -316,7 +317,7 @@ in
           example = 2;
           description = ''
             Instead of setting this directly, you should set
-            {option}`determinate-nix.linux-builder.config.virtualisation.cores` to configure
+            {option}`determinateNix.linux-builder.config.virtualisation.cores` to configure
             the amount of cores the Linux builder should have.
 
             The number of concurrent jobs the Linux builder machine supports. The
@@ -324,7 +325,7 @@ in
             to schedule better since there is no work-stealing between build
             machines.
 
-            This sets the corresponding `determinate-nix.buildMachines.*.maxJobs` option.
+            This sets the corresponding `determinateNix.buildMachines.*.maxJobs` option.
           '';
         };
 
@@ -352,7 +353,7 @@ in
             that indicates the speed of this builder, relative to other
             builders. Higher is faster.
 
-            This sets the corresponding `determinate-nix.buildMachines.*.speedFactor` option.
+            This sets the corresponding `determinateNix.buildMachines.*.speedFactor` option.
           '';
         };
 
@@ -370,7 +371,7 @@ in
             be ignored for derivations that require features not in this
             list.
 
-            This sets the corresponding `determinate-nix.buildMachines.*.supportedFeatures` option.
+            This sets the corresponding `determinateNix.buildMachines.*.supportedFeatures` option.
           '';
         };
 
@@ -473,7 +474,7 @@ in
             }
           )
         );
-        inherit (managedDefault "nix.registry" { }) default defaultText;
+        inherit (managedDefault "determinateNix.registry" { }) default defaultText;
         description = ''
           The system-wide flake registry. We recommend using the registry only for CLI commands, such as
           `nix search nixpkgs ponysay` or `nix build nixpkgs#cowsay`, and not for flake references in Nix code.
@@ -493,7 +494,7 @@ in
                 If set to `true`, Determinate Nix automatically detects files in the store
                 that have identical contents and replaces them with hard links to a single copy.
                 This saves disk space. If set to `false` (the default), you can enable
-                {option}`determinate-nix.optimise.automatic` to run {command}`nix-store --optimise`
+                {option}`determinateNix.optimise.automatic` to run {command}`nix-store --optimise`
                 periodically to get rid of duplicate files. You can also run
                 {command}`nix-store --optimise` manually.
               '';
@@ -541,7 +542,7 @@ in
 
             trusted-users = mkOption {
               type = types.listOf types.str;
-              inherit (managedDefault "determinate-nix.trusted-users" [ ]) default defaultText;
+              inherit (managedDefault "determinateNix.trusted-users" [ ]) default defaultText;
               example = [
                 "root"
                 "alice"
@@ -577,7 +578,7 @@ in
       assertions = [
         {
           assertion = cfg.enable;
-          message = ''`determinate-nix.linux-builder.enable` requires `determinate-nix.enable`'';
+          message = ''`determinateNix.nixpkgsLinuxBuilder.enable` requires `determinateNix.enable`'';
         }
       ];
 
@@ -626,9 +627,9 @@ in
           IdentityFile /etc/nix/builder_ed25519
       '';
 
-      determinate-nix.distributedBuilds = true;
+      determinateNix.distributedBuilds = true;
 
-      determinate-nix.buildMachines = [
+      determinateNix.buildMachines = [
         {
           hostName = "linux-builder";
           sshUser = "builder";
@@ -645,7 +646,7 @@ in
         }
       ];
 
-      determinate-nix.settings.builders-use-substitutes = true;
+      determinateNix.settings.builders-use-substitutes = true;
     })
 
     {
@@ -653,7 +654,7 @@ in
         {
           assertion = all (key: !hasAttr key cfg.settings) disallowedOptions;
           message = ''
-            These settings are not allowed in `determinate-nix.settings`:
+            These settings are not allowed in `determinateNix.settings`:
               ${concatStringsSep ", " disallowedOptions}
           '';
         }
@@ -662,7 +663,7 @@ in
       warnings = [
         (mkIf (
           !cfg.distributedBuilds && cfg.buildMachines != [ ]
-        ) "determinate-nix.distributedBuilds is not enabled, thus build machines aren't configured.")
+        ) "`determinateNix.distributedBuilds` is not enabled, thus build machines aren't configured.")
       ];
 
       # Disable nix-darwin's internal mechanisms for handling Nix configuration
@@ -681,7 +682,7 @@ in
       environment.variables = cfg.envVars;
 
       # Create the Nix flake registry
-      environment.etc."nix/registry.json" = mkIf (cfg.registry != [ ]) {
+      environment.etc.${registryFile} = mkIf (cfg.registry != { }) {
         text = builtins.toJSON {
           version = 2;
           flakes = mapAttrsToList (n: v: { inherit (v) from to exact; }) cfg.registry;
@@ -726,8 +727,13 @@ in
         ) cfg.buildMachines;
       };
 
-      determinate-nix.settings = mkMerge [
+      determinateNix.settings = mkMerge [
         (mkIf (!cfg.distributedBuilds) { builders = null; })
+        (mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
+        (mkIf (nixpkgsLinuxBuilderCfg.enable) {
+          build-users-group = "nixbld";
+          trusted-users = [ "root" ];
+        })
       ];
     }
   ]);
