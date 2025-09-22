@@ -212,7 +212,7 @@ in
         default = [ ];
         description = ''
           This option lists the machines to be used if distributed builds are
-          enabled (see {option}`nix.distributedBuilds`).
+          enabled (see {option}`determinate-nix.distributedBuilds`).
           Nix will perform derivations on those machines via SSH by copying the
           inputs to the Nix store on the remote machine, starting the build,
           then copying the output back to the local Nix store.
@@ -221,7 +221,7 @@ in
 
       distributedBuilds = mkOption {
         type = types.bool;
-        inherit (managedDefault "nix.distributedBuilds" false) default defaultText;
+        inherit (managedDefault "determinate-nix.distributedBuilds" false) default defaultText;
         description = ''
           Whether to distribute builds to the machines listed in
           {option}`determinate-nix.buildMachines`.
@@ -232,7 +232,7 @@ in
       envVars = mkOption {
         type = types.attrs;
         internal = true;
-        inherit (managedDefault "nix.envVars" { }) default defaultText;
+        inherit (managedDefault "determinate-nix.envVars" { }) default defaultText;
         description = "Environment variables used by Nix.";
       };
 
@@ -598,6 +598,9 @@ in
         ]
         ++ mkCustomConfig config.determinate-nix.settings
       );
+
+      # Set up the environment variables for running Nix
+      environment.variables = cfg.envVars;
 
       # List of machines for distributed Nix builds in the format
       # expected by build-remote.pl.
