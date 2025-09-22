@@ -60,6 +60,7 @@
                   flake-registry = "/etc/nix/flake-registry.json";
                 };
               };
+              system.stateVersion = 5;
             }
           ];
         }).system;

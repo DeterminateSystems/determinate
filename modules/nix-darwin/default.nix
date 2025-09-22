@@ -7,6 +7,7 @@
 
 let
   cfg = config.determinate-nix;
+  nixpkgsLinuxBuilderCfg = cfg.nixpkgs-linux-builder;
 
   inherit (lib)
     all
@@ -249,162 +250,158 @@ in
         description = "Environment variables used by Nix.";
       };
 
-      nixpkgs-linux-builder =
-        let
-          linuxBuilderCfg = cfg.nixpkgs-linux-builder;
-        in
-        {
-          enable = mkEnableOption "Nixpkgs Linux builder (distinct from Determinate Nix's native Linux builder)";
+      nixpkgs-linux-builder = {
+        enable = mkEnableOption "Nixpkgs Linux builder (distinct from Determinate Nix's native Linux builder)";
 
-          package = mkOption {
-            type = types.package;
-            default = pkgs.darwin.linux-builder;
-            defaultText = "pkgs.darwin.linux-builder";
-            apply =
-              pkg:
-              pkg.override (old: {
-                # the linux-builder package requires `modules` as an argument, so it's
-                # always non-null.
-                modules = old.modules ++ [ linuxBuilderCfg.config ];
-              });
-            description = ''
-              This option specifies the non-native Linux builder to use.
-            '';
-          };
-
-          config = mkOption {
-            type = types.deferredModule;
-            default = { };
-            example = literalExpression ''
-              ({ pkgs, ... }:
-
-              {
-                environment.systemPackages = [ pkgs.neovim ];
-              })
-            '';
-            description = ''
-              This option specifies extra NixOS configuration for the Nixpkgs Linux builder.
-              You should first use the Nixpkgs Linux builder without changing the builder configuration, otherwise you may not be able to build the Linux builder (unless you're using the native Linux builder).
-            '';
-          };
-
-          ephemeral = mkEnableOption ''
-            wipe the builder's filesystem on every restart.
-
-            This is disabled by default as maintaining the builder's Nix Store reduces
-            rebuilds. You can enable this if you don't want your builder to accumulate
-            state.
+        package = mkOption {
+          type = types.package;
+          default = pkgs.darwin.linux-builder;
+          defaultText = "pkgs.darwin.linux-builder";
+          apply =
+            pkg:
+            pkg.override (old: {
+              # the linux-builder package requires `modules` as an argument, so it's
+              # always non-null.
+              modules = old.modules ++ [ nixpkgsLinuxBuilderCfg.config ];
+            });
+          description = ''
+            This option specifies the non-native Linux builder to use.
           '';
-
-          mandatoryFeatures = mkOption {
-            type = types.listOf types.str;
-            default = [ ];
-            defaultText = literalExpression ''[]'';
-            example = literalExpression ''[ "big-parallel" ]'';
-            description = ''
-              A list of features mandatory for the Nixpkgs Linux builder. The builder is
-              ignored for derivations that don't require all features in
-              this list. All mandatory features are automatically included in
-              {var}`supportedFeatures`.
-
-              This sets the corresponding `determinate-nix.buildMachines.*.mandatoryFeatures` option.
-            '';
-          };
-
-          maxJobs = mkOption {
-            type = types.ints.positive;
-            default = linuxBuilderCfg.package.nixosConfig.virtualisation.cores;
-            defaultText = ''
-              The `virtualisation.cores` of the build machine's final NixOS configuration.
-            '';
-            example = 2;
-            description = ''
-              Instead of setting this directly, you should set
-              {option}`determinate-nix.linux-builder.config.virtualisation.cores` to configure
-              the amount of cores the Linux builder should have.
-
-              The number of concurrent jobs the Linux builder machine supports. The
-              build machine will enforce its own limits, but this allows hydra
-              to schedule better since there is no work-stealing between build
-              machines.
-
-              This sets the corresponding `determinate-nix.buildMachines.*.maxJobs` option.
-            '';
-          };
-
-          protocol = mkOption {
-            type = types.str;
-            default = "ssh-ng";
-            defaultText = literalExpression ''"ssh-ng"'';
-            example = literalExpression ''"ssh"'';
-            description = ''
-              The protocol used for communicating with the build machine.  Use
-              `ssh-ng` if your remote builder and your local Nix version support that
-              improved protocol.
-
-              Use `null` when trying to change the special localhost builder without a
-              protocol which is for example used by hydra.
-            '';
-          };
-
-          speedFactor = mkOption {
-            type = types.ints.positive;
-            default = 1;
-            defaultText = literalExpression ''1'';
-            description = ''
-              The relative speed of the Nixpkgs Linux builder. This is an arbitrary integer
-              that indicates the speed of this builder, relative to other
-              builders. Higher is faster.
-
-              This sets the corresponding `determinate-nix.buildMachines.*.speedFactor` option.
-            '';
-          };
-
-          supportedFeatures = mkOption {
-            type = types.listOf types.str;
-            default = [
-              "kvm"
-              "benchmark"
-              "big-parallel"
-            ];
-            defaultText = literalExpression ''[ "kvm" "benchmark" "big-parallel" ]'';
-            example = literalExpression ''[ "kvm" "big-parallel" ]'';
-            description = ''
-              A list of features supported by the Nixpkgs Linux builder. The builder will
-              be ignored for derivations that require features not in this
-              list.
-
-              This sets the corresponding `determinate-nix.buildMachines.*.supportedFeatures` option.
-            '';
-          };
-
-          systems = mkOption {
-            type = types.listOf types.str;
-            default = [ linuxBuilderCfg.package.nixosConfig.nixpkgs.hostPlatform.system ];
-            defaultText = ''
-              The `nixpkgs.hostPlatform.system` of the build machine's final NixOS configuration.
-            '';
-            example = literalExpression ''
-              [
-                "x86_64-linux"
-                "aarch64-linux"
-              ]
-            '';
-            description = ''
-              This option specifies system types the build machine can execute derivations on.
-
-              This sets the corresponding `nix.buildMachines.*.systems` option.
-            '';
-          };
-
-          workingDirectory = mkOption {
-            type = types.str;
-            default = "/var/lib/linux-builder";
-            description = ''
-              The working directory of the Linux builder daemon process.
-            '';
-          };
         };
+
+        config = mkOption {
+          type = types.deferredModule;
+          default = { };
+          example = literalExpression ''
+            ({ pkgs, ... }:
+
+            {
+              environment.systemPackages = [ pkgs.neovim ];
+            })
+          '';
+          description = ''
+            This option specifies extra NixOS configuration for the Nixpkgs Linux builder.
+            You should first use the Nixpkgs Linux builder without changing the builder configuration, otherwise you may not be able to build the Linux builder (unless you're using the native Linux builder).
+          '';
+        };
+
+        ephemeral = mkEnableOption ''
+          wipe the builder's filesystem on every restart.
+
+          This is disabled by default as maintaining the builder's Nix Store reduces
+          rebuilds. You can enable this if you don't want your builder to accumulate
+          state.
+        '';
+
+        mandatoryFeatures = mkOption {
+          type = types.listOf types.str;
+          default = [ ];
+          defaultText = literalExpression ''[]'';
+          example = literalExpression ''[ "big-parallel" ]'';
+          description = ''
+            A list of features mandatory for the Nixpkgs Linux builder. The builder is
+            ignored for derivations that don't require all features in
+            this list. All mandatory features are automatically included in
+            {var}`supportedFeatures`.
+
+            This sets the corresponding `determinate-nix.buildMachines.*.mandatoryFeatures` option.
+          '';
+        };
+
+        maxJobs = mkOption {
+          type = types.ints.positive;
+          default = nixpkgsLinuxBuilderCfg.package.nixosConfig.virtualisation.cores;
+          defaultText = ''
+            The `virtualisation.cores` of the build machine's final NixOS configuration.
+          '';
+          example = 2;
+          description = ''
+            Instead of setting this directly, you should set
+            {option}`determinate-nix.linux-builder.config.virtualisation.cores` to configure
+            the amount of cores the Linux builder should have.
+
+            The number of concurrent jobs the Linux builder machine supports. The
+            build machine will enforce its own limits, but this allows hydra
+            to schedule better since there is no work-stealing between build
+            machines.
+
+            This sets the corresponding `determinate-nix.buildMachines.*.maxJobs` option.
+          '';
+        };
+
+        protocol = mkOption {
+          type = types.str;
+          default = "ssh-ng";
+          defaultText = literalExpression ''"ssh-ng"'';
+          example = literalExpression ''"ssh"'';
+          description = ''
+            The protocol used for communicating with the build machine.  Use
+            `ssh-ng` if your remote builder and your local Nix version support that
+            improved protocol.
+
+            Use `null` when trying to change the special localhost builder without a
+            protocol which is for example used by hydra.
+          '';
+        };
+
+        speedFactor = mkOption {
+          type = types.ints.positive;
+          default = 1;
+          defaultText = literalExpression ''1'';
+          description = ''
+            The relative speed of the Nixpkgs Linux builder. This is an arbitrary integer
+            that indicates the speed of this builder, relative to other
+            builders. Higher is faster.
+
+            This sets the corresponding `determinate-nix.buildMachines.*.speedFactor` option.
+          '';
+        };
+
+        supportedFeatures = mkOption {
+          type = types.listOf types.str;
+          default = [
+            "kvm"
+            "benchmark"
+            "big-parallel"
+          ];
+          defaultText = literalExpression ''[ "kvm" "benchmark" "big-parallel" ]'';
+          example = literalExpression ''[ "kvm" "big-parallel" ]'';
+          description = ''
+            A list of features supported by the Nixpkgs Linux builder. The builder will
+            be ignored for derivations that require features not in this
+            list.
+
+            This sets the corresponding `determinate-nix.buildMachines.*.supportedFeatures` option.
+          '';
+        };
+
+        systems = mkOption {
+          type = types.listOf types.str;
+          default = [ nixpkgsLinuxBuilderCfg.package.nixosConfig.nixpkgs.hostPlatform.system ];
+          defaultText = ''
+            The `nixpkgs.hostPlatform.system` of the build machine's final NixOS configuration.
+          '';
+          example = literalExpression ''
+            [
+              "x86_64-linux"
+              "aarch64-linux"
+            ]
+          '';
+          description = ''
+            This option specifies system types the build machine can execute derivations on.
+
+            This sets the corresponding `nix.buildMachines.*.systems` option.
+          '';
+        };
+
+        workingDirectory = mkOption {
+          type = types.str;
+          default = "/var/lib/linux-builder";
+          description = ''
+            The working directory of the Linux builder daemon process.
+          '';
+        };
+      };
 
       registry = mkOption {
         type = types.attrsOf (
@@ -570,14 +567,14 @@ in
 
   config = mkIf (cfg.enable) (mkMerge [
     # Nixpkgs Linux builder not enabled
-    (mkIf (!cfg.nixpkgs-linux-builder.enable) {
+    (mkIf (!nixpkgsLinuxBuilderCfg.enable) {
       system.activationScripts.preActivation.text = ''
-        rm -rf ${cfg.nixpkgs-linux-builder.workingDirectory}
+        rm -rf ${nixpkgsLinuxBuilderCfg.workingDirectory}
       '';
     })
 
     # Nixpkgs Linux builder enabled
-    (mkIf (cfg.nixpkgs-linux-builder.enable) {
+    (mkIf (nixpkgsLinuxBuilderCfg.enable) {
       assertions = [
         {
           assertion = cfg.enable;
@@ -587,11 +584,11 @@ in
 
       system.activationScripts.preActivation.text = ''
         # Migrate if using the old working directory
-        if [ -e /var/lib/darwin-builder ] && [ ! -e ${cfg.nixpkgs-linux-builder.workingDirectory} ]; then
-          mv /var/lib/darwin-builder ${cfg.nixpkgs-linux-builder.workingDirectory}
+        if [ -e /var/lib/darwin-builder ] && [ ! -e ${nixpkgsLinuxBuilderCfg.workingDirectory} ]; then
+          mv /var/lib/darwin-builder ${nixpkgsLinuxBuilderCfg.workingDirectory}
         fi
 
-        mkdir -p ${cfg.nixpkgs-linux-builder.workingDirectory}
+        mkdir -p ${nixpkgsLinuxBuilderCfg.workingDirectory}
       '';
 
       launchd.daemons.linux-builder = {
@@ -608,16 +605,16 @@ in
           rm -rf $TMPDIR
           mkdir -p $TMPDIR
           trap "rm -rf $TMPDIR" EXIT
-          ${optionalString cfg.nixpkgs-linux-builder.ephemeral ''
-            rm -f ${cfg.nixpkgs-linux-builder.workingDirectory}/${cfg.nixpkgs-linux-builder.package.nixosConfig.networking.hostName}.qcow2
+          ${optionalString nixpkgsLinuxBuilderCfg.ephemeral ''
+            rm -f ${nixpkgsLinuxBuilderCfg.workingDirectory}/${nixpkgsLinuxBuilderCfg.package.nixosConfig.networking.hostName}.qcow2
           ''}
-          ${cfg.nixpkgs-linux-builder.package}/bin/create-builder
+          ${nixpkgsLinuxBuilderCfg.package}/bin/create-builder
         '';
 
         serviceConfig = {
           KeepAlive = true;
           RunAtLoad = true;
-          WorkingDirectory = cfg.nixpkgs-linux-builder.workingDirectory;
+          WorkingDirectory = nixpkgsLinuxBuilderCfg.workingDirectory;
         };
       };
 
