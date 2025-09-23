@@ -14,7 +14,7 @@ You can get started with Determinate in one of two ways:
 | :------------------------------ | :--------------------------------------------------------------------------- |
 | **Linux** but not using [NixOS] | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
 | **macOS**                       | [Determinate Nix Installer](#installing-using-the-determinate-nix-installer) |
-| **Linux** and using [NixOS]     | The [NixOS module](#nixos) provided by this flake                            |
+| **Linux** and using [NixOS]     | The [NixOS module](#installing-using-our-nix-flake) provided by this flake                            |
 
 ## Installing using the Determinate Nix Installer
 
