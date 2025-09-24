@@ -244,6 +244,50 @@ in
         '';
       };
 
+      # Determinate Nixd configuration: https://docs.determinate.systems/determinate-nix#determinate-nixd-configuration
+      determinateNixd = mkOption {
+        type = types.submodule {
+          options = {
+            authentication.additionalNetrcSources = mkOption {
+              type = types.listOf (
+                types.oneOf [
+                  types.path
+                  types.str
+                ]
+              );
+              default = [ ];
+              description = ''
+                A list of paths to `netrc` files that are combined by Determinate Nixd and used by Determinate Nix. These files must exist and not be in `/nix/store` or the daemon refuses to start.
+              '';
+            };
+            builder.state = mkOption {
+              type = types.enum [
+                "disabled"
+                "enabled"
+              ];
+              default = "enabled";
+              description = ''
+                Whether Determinate Nix's native Linux builder is enabled.
+              '';
+            };
+            garbageCollector.strategy = mkOption {
+              type = types.enum [
+                "automatic"
+                "disabled"
+              ];
+              default = "automatic";
+              description = ''
+                The garbage collection strategy used by Determinate Nixd. `automatic` means that Determinate Nixd automatically collects garbage in the background while `disabled` means no garbage collection.
+              '';
+            };
+          };
+        };
+        default = { };
+        description = ''
+          Configuration for Determinate Nixd. See: https://docs.determinate.systems/determinate-nix#determinate-nixd-configuration.
+        '';
+      };
+
       distributedBuilds = mkOption {
         type = types.bool;
         inherit (managedDefault "determinateNix.distributedBuilds" false) default defaultText;
@@ -638,26 +682,28 @@ in
           IdentityFile /etc/nix/builder_ed25519
       '';
 
-      determinateNix.distributedBuilds = true;
-
-      determinateNix.buildMachines = [
-        {
-          hostName = "linux-builder";
-          sshUser = "builder";
-          sshKey = "/etc/nix/builder_ed25519";
-          publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
-          inherit (nixosVmBasedLinuxBuilderCfg)
-            mandatoryFeatures
-            maxJobs
-            protocol
-            speedFactor
-            supportedFeatures
-            systems
-            ;
-        }
-      ];
-
-      determinateNix.customSettings.builders-use-substitutes = true;
+      # Override Determinate Nix config
+      determinateNix = {
+        buildMachines = [
+          {
+            hostName = "linux-builder";
+            sshUser = "builder";
+            sshKey = "/etc/nix/builder_ed25519";
+            publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
+            inherit (nixosVmBasedLinuxBuilderCfg)
+              mandatoryFeatures
+              maxJobs
+              protocol
+              speedFactor
+              supportedFeatures
+              systems
+              ;
+          }
+        ];
+        distributedBuilds = true;
+        customSettings.builders-use-substitutes = true;
+        determinateNixd.builder.state = "disabled";
+      };
     })
 
     {
@@ -699,6 +745,9 @@ in
           flakes = mapAttrsToList (n: v: { inherit (v) from to exact; }) cfg.registry;
         };
       };
+
+      # Determinate Nixd configuration
+      environment.etc."determinate/config.json".text = builtins.toJSON cfg.determinateNixd;
 
       # List of machines for distributed Nix builds in the format
       # expected by build-remote.pl.
