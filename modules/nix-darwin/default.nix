@@ -621,13 +621,6 @@ in
   };
 
   config = mkIf (cfg.enable) (mkMerge [
-    # Nixpkgs Linux builder not enabled
-    (mkIf (!nixosVmBasedLinuxBuilderCfg.enable) {
-      system.activationScripts.preActivation.text = ''
-        rm -rf ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
-      '';
-    })
-
     # Nixpkgs Linux builder enabled
     (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
       assertions = [
