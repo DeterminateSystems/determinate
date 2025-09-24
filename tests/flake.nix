@@ -10,17 +10,15 @@
 
   outputs =
     {
-      nixpkgs,
-      determinate,
-      nix-darwin,
+      self,
       ...
-    }:
+    }@inputs:
     {
       checks.x86_64-linux.nixos =
-        (nixpkgs.lib.nixosSystem {
+        (inputs.nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
-            determinate.nixosModules.default
+            inputs.determinate.nixosModules.default
             {
               fileSystems."/" = {
                 device = "/dev/bogus";
@@ -33,11 +31,11 @@
         }).config.system.build.toplevel;
 
       checks.aarch64-darwin.nix-darwin =
-        (nix-darwin.lib.darwinSystem {
+        (inputs.nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
 
           modules = [
-            determinate.darwinModules.default
+            inputs.determinate.darwinModules.default
             {
               determinateNix.enable = true;
               system.stateVersion = 5;
@@ -46,11 +44,11 @@
         }).system;
 
       checks.aarch64-darwin.nix-darwin-custom-config =
-        (nix-darwin.lib.darwinSystem {
+        (inputs.nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
 
           modules = [
-            determinate.darwinModules.default
+            inputs.determinate.darwinModules.default
             {
               determinateNix = {
                 enable = true;

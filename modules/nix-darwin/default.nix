@@ -7,7 +7,7 @@
 
 let
   cfg = config.determinateNix;
-  nixpkgsLinuxBuilderCfg = cfg.nixpkgsLinuxBuilder;
+  nixosVmBasedLinuxBuilderCfg = cfg.nixosVmBasedLinuxBuilder;
 
   inherit (lib)
     all
@@ -76,6 +76,7 @@ let
   registryFile = "nix/registry.json";
 in
 {
+  # Rename the `determinate-nix` attribute to `determinateNix` to standardize on dromedary case.
   imports = [
     (mkRenamedOptionModule [ "determinate-nix" ] [ "determinateNix" ])
   ];
@@ -87,14 +88,19 @@ in
         default = true;
         description = ''
           Whether to enable configuring Determinate Nix via nix-darwin.
-          If you set `enable` to `true`, this module prevents nix-darwin from managing:
+          If you set `enable` to `true`, this module does two things:
 
-          1. Custom Determinate Nix settings in {file}`/etc/${customConfFile}`.
-          2. Remote Nix builders
-          3. A local Linux builder (distinct from Determinate Nix's native Linux builder).
+          1. It prevents nix-darwin from managing Nix's configuration in {file}`/etc/nix/nix.conf`, leaving that configuration to Determinate Nixd.
+          2. It enables you to manage any custom Nix settings in {file}`/etc/${customConfFile}` using the `determinateNix.customSettings` attribute.
+
+          Like the standard nix-darwin module, this Determinate module enables you to configure:
+
+          1. VM-based Nix builders using the `buildMachines` setting.
+          2. A local VM-based Linux builder from Nixpkgs. Note that this is distinct from Determinate Nix's own native Linux builder, which uses macOS's built-in Virtualization framework. We recommend using this native Linux builder but still support the Nixpkgs builder.
         '';
       };
 
+      # Local build machines specified in `/etc/nix/machines`.
       buildMachines = mkOption {
         type = types.listOf (
           types.submodule {
@@ -247,7 +253,7 @@ in
         '';
       };
 
-      # Environment variables for running Nix.
+      # Environment variables for running Nix
       envVars = mkOption {
         type = types.attrs;
         internal = true;
@@ -255,8 +261,8 @@ in
         description = "Environment variables used by Nix.";
       };
 
-      nixpkgsLinuxBuilder = {
-        enable = mkEnableOption "Nixpkgs Linux builder (distinct from Determinate Nix's native Linux builder)";
+      nixosVmBasedLinuxBuilder = {
+        enable = mkEnableOption "NixOS-VM-based Linux builder for macOS (distinct from Determinate Nix's native Linux builder, which we recommend)";
 
         package = mkOption {
           type = types.package;
@@ -267,10 +273,10 @@ in
             pkg.override (old: {
               # the linux-builder package requires `modules` as an argument, so it's
               # always non-null.
-              modules = old.modules ++ [ nixpkgsLinuxBuilderCfg.config ];
+              modules = old.modules ++ [ nixosVmBasedLinuxBuilder.config ];
             });
           description = ''
-            This option specifies the non-native Linux builder to use.
+            This option specifies the NixOS-VM-based Linux builder to use.
           '';
         };
 
@@ -291,9 +297,9 @@ in
         };
 
         ephemeral = mkEnableOption ''
-          wipe the builder's filesystem on every restart.
+          Wipe the builder's filesystem on every restart.
 
-          This is disabled by default as maintaining the builder's Nix Store reduces
+          This is disabled by default because maintaining the builder's Nix store means fewer
           rebuilds. You can enable this if you don't want your builder to accumulate
           state.
         '';
@@ -315,7 +321,7 @@ in
 
         maxJobs = mkOption {
           type = types.ints.positive;
-          default = nixpkgsLinuxBuilderCfg.package.nixosConfig.virtualisation.cores;
+          default = nixosVmBasedLinuxBuilderCfg.package.nixosConfig.virtualisation.cores;
           defaultText = ''
             The `virtualisation.cores` of the build machine's final NixOS configuration.
           '';
@@ -382,7 +388,7 @@ in
 
         systems = mkOption {
           type = types.listOf types.str;
-          default = [ nixpkgsLinuxBuilderCfg.package.nixosConfig.nixpkgs.hostPlatform.system ];
+          default = [ nixosVmBasedLinuxBuilderCfg.package.nixosConfig.nixpkgs.hostPlatform.system ];
           defaultText = ''
             The `nixpkgs.hostPlatform.system` of the build machine's final NixOS configuration.
           '';
@@ -572,28 +578,28 @@ in
 
   config = mkIf (cfg.enable) (mkMerge [
     # Nixpkgs Linux builder not enabled
-    (mkIf (!nixpkgsLinuxBuilderCfg.enable) {
+    (mkIf (!nixosVmBasedLinuxBuilderCfg.enable) {
       system.activationScripts.preActivation.text = ''
-        rm -rf ${nixpkgsLinuxBuilderCfg.workingDirectory}
+        rm -rf ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
       '';
     })
 
     # Nixpkgs Linux builder enabled
-    (mkIf (nixpkgsLinuxBuilderCfg.enable) {
+    (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
       assertions = [
         {
           assertion = cfg.enable;
-          message = ''`determinateNix.nixpkgsLinuxBuilder.enable` requires `determinateNix.enable`'';
+          message = ''`determinateNix.nixosVmBasedLinuxBuilder.enable` requires `determinateNix.enable`'';
         }
       ];
 
       system.activationScripts.preActivation.text = ''
         # Migrate if using the old working directory
-        if [ -e /var/lib/darwin-builder ] && [ ! -e ${nixpkgsLinuxBuilderCfg.workingDirectory} ]; then
-          mv /var/lib/darwin-builder ${nixpkgsLinuxBuilderCfg.workingDirectory}
+        if [ -e /var/lib/darwin-builder ] && [ ! -e ${nixosVmBasedLinuxBuilderCfg.workingDirectory} ]; then
+          mv /var/lib/darwin-builder ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
         fi
 
-        mkdir -p ${nixpkgsLinuxBuilderCfg.workingDirectory}
+        mkdir -p ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
       '';
 
       launchd.daemons.linux-builder = {
@@ -610,16 +616,16 @@ in
           rm -rf $TMPDIR
           mkdir -p $TMPDIR
           trap "rm -rf $TMPDIR" EXIT
-          ${optionalString nixpkgsLinuxBuilderCfg.ephemeral ''
-            rm -f ${nixpkgsLinuxBuilderCfg.workingDirectory}/${nixpkgsLinuxBuilderCfg.package.nixosConfig.networking.hostName}.qcow2
+          ${optionalString nixosVmBasedLinuxBuilderCfg.ephemeral ''
+            rm -f ${nixosVmBasedLinuxBuilderCfg.workingDirectory}/${nixosVmBasedLinuxBuilderCfg.package.nixosConfig.networking.hostName}.qcow2
           ''}
-          ${nixpkgsLinuxBuilderCfg.package}/bin/create-builder
+          ${nixosVmBasedLinuxBuilderCfg.package}/bin/create-builder
         '';
 
         serviceConfig = {
           KeepAlive = true;
           RunAtLoad = true;
-          WorkingDirectory = nixpkgsLinuxBuilderCfg.workingDirectory;
+          WorkingDirectory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
         };
       };
 
@@ -640,7 +646,7 @@ in
           sshUser = "builder";
           sshKey = "/etc/nix/builder_ed25519";
           publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
-          inherit (nixpkgsLinuxBuilderCfg)
+          inherit (nixosVmBasedLinuxBuilder)
             mandatoryFeatures
             maxJobs
             protocol
@@ -735,7 +741,7 @@ in
       determinateNix.customSettings = mkMerge [
         (mkIf (!cfg.distributedBuilds) { builders = null; })
         (mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
-        (mkIf (nixpkgsLinuxBuilderCfg.enable) {
+        (mkIf (nixosVmBasedLinuxBuilder.enable) {
           build-users-group = "nixbld";
           trusted-users = [ "root" ];
         })
