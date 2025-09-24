@@ -273,7 +273,7 @@ in
             pkg.override (old: {
               # the linux-builder package requires `modules` as an argument, so it's
               # always non-null.
-              modules = old.modules ++ [ nixosVmBasedLinuxBuilder.config ];
+              modules = old.modules ++ [ nixosVmBasedLinuxBuilderCfg.config ];
             });
           description = ''
             This option specifies the NixOS-VM-based Linux builder to use.
@@ -646,7 +646,7 @@ in
           sshUser = "builder";
           sshKey = "/etc/nix/builder_ed25519";
           publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
-          inherit (nixosVmBasedLinuxBuilder)
+          inherit (nixosVmBasedLinuxBuilderCfg)
             mandatoryFeatures
             maxJobs
             protocol
@@ -741,7 +741,7 @@ in
       determinateNix.customSettings = mkMerge [
         (mkIf (!cfg.distributedBuilds) { builders = null; })
         (mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
-        (mkIf (nixosVmBasedLinuxBuilder.enable) {
+        (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
           build-users-group = "nixbld";
           trusted-users = [ "root" ];
         })
