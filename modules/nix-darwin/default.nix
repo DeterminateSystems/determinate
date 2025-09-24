@@ -23,6 +23,7 @@ let
     mkIf
     mkMerge
     mkOption
+    mkRenamedOptionModule
     optionalString
     types
     ;
@@ -75,6 +76,10 @@ let
   registryFile = "nix/registry.json";
 in
 {
+  imports = [
+    (mkRenamedOptionModule [ "determinate-nix" ] [ "determinateNix" ])
+  ];
+
   options = {
     determinateNix = {
       enable = mkOption {
@@ -151,7 +156,7 @@ in
                   The username to log in as on the remote host. This user must be
                   able to log in and run nix commands non-interactively. It must
                   also be privileged to build derivations, so must be included in
-                  {option}`determinateNix.settings.trusted-users`.
+                  {option}`determinateNix.customSettings.trusted-users`.
                 '';
               };
               sshKey = mkOption {
@@ -481,7 +486,7 @@ in
         '';
       };
 
-      settings = mkOption {
+      customSettings = mkOption {
         type = types.submodule {
           freeformType = semanticConfType;
 
@@ -646,15 +651,15 @@ in
         }
       ];
 
-      determinateNix.settings.builders-use-substitutes = true;
+      determinateNix.customSettings.builders-use-substitutes = true;
     })
 
     {
       assertions = [
         {
-          assertion = all (key: !hasAttr key cfg.settings) disallowedOptions;
+          assertion = all (key: !hasAttr key cfg.customSettings) disallowedOptions;
           message = ''
-            These settings are not allowed in `determinateNix.settings`:
+            These settings are not allowed in `determinateNix.customSettings`:
               ${concatStringsSep ", " disallowedOptions}
           '';
         }
@@ -675,7 +680,7 @@ in
           "# Update your custom settings by changing your nix-darwin configuration, not by modifying this file directly."
           ""
         ]
-        ++ mkCustomConfig cfg.settings
+        ++ mkCustomConfig cfg.customSettings
       );
 
       # Set up the environment variables for running Nix
@@ -727,7 +732,7 @@ in
         ) cfg.buildMachines;
       };
 
-      determinateNix.settings = mkMerge [
+      determinateNix.customSettings = mkMerge [
         (mkIf (!cfg.distributedBuilds) { builders = null; })
         (mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
         (mkIf (nixpkgsLinuxBuilderCfg.enable) {
