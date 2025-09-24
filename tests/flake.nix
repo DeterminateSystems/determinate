@@ -57,6 +57,11 @@
                   extra-experimental-features = [ "build-time-fetch-tree" ];
                   flake-registry = "/etc/nix/flake-registry.json";
                 };
+                determinateNixd = {
+                  builder.state = "disabled";
+                  authentication.additionalNetrcSources = [ "/etc/extra/netrc" ];
+                  garbageCollector.strategy = "disabled";
+                };
               };
               system.stateVersion = 5;
             }
