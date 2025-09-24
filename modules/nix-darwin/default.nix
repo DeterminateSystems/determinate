@@ -372,7 +372,7 @@ in
           example = 2;
           description = ''
             Instead of setting this directly, you should set
-            {option}`determinateNix.linux-builder.config.virtualisation.cores` to configure
+            {option}`determinateNix.nixosVmBasedLinuxBuilder.config.virtualisation.cores` to configure
             the amount of cores the Linux builder should have.
 
             The number of concurrent jobs the Linux builder machine supports. The
@@ -694,8 +694,8 @@ in
           }
         ];
         distributedBuilds = true;
-        customSettings.builders-use-substitutes = true;
         determinateNixd.builder.state = "disabled";
+        customSettings.builders-use-substitutes = true;
       };
     })
 
