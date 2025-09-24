@@ -49,5 +49,11 @@ let
   mkKeyValue = k: v: "${lib.escape [ "=" ] k} = ${mkValueString v}";
 in
 {
-  mkCustomConfig = attrs: lib.mapAttrsToList mkKeyValue attrs;
+  mkCustomConfig =
+    attrs:
+    let
+      # Filter out null attributes so that you don't end up with lines like `my-attr =`.
+      nonNullAttrs = lib.filterAttrs (_: v: v != null) attrs;
+    in
+    lib.mapAttrsToList mkKeyValue nonNullAttrs;
 }
