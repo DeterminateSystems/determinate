@@ -17,6 +17,7 @@ let
     hasAttr
     literalExpression
     mapAttrsToList
+    mkAfter
     mkDefault
     mkEnableOption
     mkForce
@@ -623,25 +624,22 @@ in
   config = mkIf (cfg.enable) (mkMerge [
     # Nixpkgs Linux builder enabled
     (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
-      assertions = [
-        {
-          assertion = cfg.enable;
-          message = ''`determinateNix.nixosVmBasedLinuxBuilder.enable` requires `determinateNix.enable`'';
-        }
-      ];
+      system.activationScripts.preActivation.text =
+        let
+          directory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
+        in
+        ''
+          # Migrate if using the old working directory
+          if [ -e /var/lib/darwin-builder ] && [ ! -e ${directory} ]; then
+            mv /var/lib/darwin-builder ${directory}
+          fi
 
-      system.activationScripts.preActivation.text = ''
-        # Migrate if using the old working directory
-        if [ -e /var/lib/darwin-builder ] && [ ! -e ${nixosVmBasedLinuxBuilderCfg.workingDirectory} ]; then
-          mv /var/lib/darwin-builder ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
-        fi
-
-        mkdir -p ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
-      '';
+          mkdir -p ${directory}
+        '';
 
       launchd.daemons.linux-builder = {
         environment = {
-          NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-certificates.crt";
+          inherit (config.environment.variables) NIX_SSL_CERT_FILE;
         };
 
         # create-builder uses TMPDIR to share files with the builder, notably certs.
@@ -784,8 +782,9 @@ in
         (mkIf (!cfg.distributedBuilds) { builders = null; })
         (mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
         (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
-          build-users-group = "nixbld";
+          trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
           trusted-users = [ "root" ];
+          substituters = mkAfter [ "https://cache.nixos.org/" ];
         })
       ];
     }
