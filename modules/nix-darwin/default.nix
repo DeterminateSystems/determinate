@@ -235,7 +235,7 @@ in
             };
           }
         );
-        default = [ ];
+        inherit (managedDefault "determinateNix.buildMachines" [ ]) default defaultText;
         description = ''
           This option lists the machines to be used if distributed builds are
           enabled (see {option}`determinateNix.distributedBuilds`).
@@ -266,7 +266,7 @@ in
                 "disabled"
                 "enabled"
               ];
-              default = "enabled";
+              default = if nixosVmBasedLinuxBuilderCfg.enable then "disabled" else "enabled";
               description = ''
                 Whether Determinate Nix's native Linux builder is enabled.
               '';
@@ -692,9 +692,15 @@ in
           }
         ];
         distributedBuilds = true;
-        determinateNixd.builder.state = "disabled";
         customSettings.builders-use-substitutes = true;
       };
+    })
+
+    # Nixpkgs Linux builder disabled
+    (mkIf (!nixosVmBasedLinuxBuilderCfg.enable) {
+      system.activationScripts.preActivation.text = ''
+        rm -rf ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
+      '';
     })
 
     {
