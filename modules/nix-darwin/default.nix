@@ -624,6 +624,15 @@ in
   config = mkIf (cfg.enable) (mkMerge [
     # Nixpkgs Linux builder enabled
     (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
+      assertions = [
+        {
+          assertion = config.determinateNix.enable;
+          message = ''
+            Setting `determinateNix.nixosVmBasedLinuxBUilder.enable = true` requires you to set `determinateNix.enable = true` as well.
+          '';
+        }
+      ];
+
       system.activationScripts.preActivation.text =
         let
           directory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
@@ -788,6 +797,7 @@ in
         (mkIf (!cfg.distributedBuilds) { builders = null; })
         (mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
         (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
+          # To enable fetching the cached NixOS VM
           trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
           trusted-users = [ "root" ];
           substituters = mkAfter [ "https://cache.nixos.org/" ];
