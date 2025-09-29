@@ -21,18 +21,22 @@ let
       lib.strings.floatToString v
     # Convert lists of strings like `["foo" "bar"]` into space-separated strings like `foo bar`
     else if builtins.isList v then
-      let
-        ensureStrings =
-          ls:
-          lib.forEach ls (
-            item:
-            if builtins.isString item then
-              item
-            else
-              throw "Expected all list items to be strings but got ${builtins.typeOf item} instead"
-          );
-      in
-      lib.concatStringsSep " " (ensureStrings v)
+      # Make empty lists nulls so that you don't end up with lines like `experimental-features =`.
+      if v == [ ] then
+        null
+      else
+        let
+          ensureStrings =
+            ls:
+            lib.forEach ls (
+              item:
+              if builtins.isString item then
+                item
+              else
+                throw "Expected all list items to be strings but got ${builtins.typeOf item} instead"
+            );
+        in
+        lib.concatStringsSep " " (ensureStrings v)
     else if lib.isDerivation v then
       builtins.toString v
     else if builtins.isPath v then
@@ -52,7 +56,7 @@ in
   mkCustomConfig =
     attrs:
     let
-      # Filter out null attributes so that you don't end up with lines like `my-attr =`.
+      # Filter out null attributes and empty lists so that you don't end up with lines like `my-attr =`.
       nonNullAttrs = lib.filterAttrs (_: v: v != null) attrs;
     in
     lib.mapAttrsToList mkKeyValue nonNullAttrs;
