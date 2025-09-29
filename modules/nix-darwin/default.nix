@@ -746,14 +746,14 @@ in
 
       # Create the Nix flake registry
       environment.etc.${registryFile} = mkIf (cfg.registry != { }) {
-        text = lib.generators.toPretty { } {
+        text = builtins.toJSON {
           version = 2;
           flakes = mapAttrsToList (n: v: { inherit (v) from to exact; }) cfg.registry;
         };
       };
 
       # Determinate Nixd configuration
-      environment.etc."determinate/config.json".text = lib.generators.toPretty { } cfg.determinateNixd;
+      environment.etc."determinate/config.json".text = builtins.toJSON cfg.determinateNixd;
 
       # List of machines for distributed Nix builds in the format
       # expected by build-remote.pl.
