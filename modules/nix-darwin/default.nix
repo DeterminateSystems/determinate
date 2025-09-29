@@ -666,11 +666,17 @@ in
           ${nixosVmBasedLinuxBuilderCfg.package}/bin/create-builder
         '';
 
-        serviceConfig = {
-          KeepAlive = true;
-          RunAtLoad = true;
-          WorkingDirectory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
-        };
+        serviceConfig =
+          let
+            logFile = "/var/log/nixos-based-vm-builder.log";
+          in
+          {
+            KeepAlive = true;
+            RunAtLoad = true;
+            StandardErrorPath = logFile;
+            StandardOutPath = logFile;
+            WorkingDirectory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
+          };
       };
 
       environment.etc."ssh/ssh_config.d/100-linux-builder.conf".text = ''
