@@ -14,6 +14,7 @@ let
     concatMapStrings
     concatStringsSep
     filterAttrs
+    getExe'
     hasAttr
     literalExpression
     mapAttrsToList
@@ -663,7 +664,7 @@ in
           ${optionalString nixosVmBasedLinuxBuilderCfg.ephemeral ''
             rm -f ${nixosVmBasedLinuxBuilderCfg.workingDirectory}/${nixosVmBasedLinuxBuilderCfg.package.nixosConfig.networking.hostName}.qcow2
           ''}
-          ${nixosVmBasedLinuxBuilderCfg.package}/bin/create-builder
+          ${getExe' nixosVmBasedLinuxBuilderCfg.package "create-builder"}
         '';
 
         serviceConfig =
