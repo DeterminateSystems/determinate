@@ -76,6 +76,7 @@ let
   # Various constant values
   customConfFile = "nix/nix.custom.conf";
   registryFile = "nix/registry.json";
+  builderIdentityFile = "/etc/nix/builder_ed25519";
 in
 {
   # Rename the `determinate-nix` attribute to `determinateNix` to standardize on dromedary case.
@@ -686,7 +687,7 @@ in
           Hostname localhost
           HostKeyAlias linux-builder
           Port 31022
-          IdentityFile /etc/nix/builder_ed25519
+          IdentityFile ${builderIdentityFile}
       '';
 
       # Override Determinate Nix config
@@ -695,7 +696,7 @@ in
           {
             hostName = "linux-builder";
             sshUser = "builder";
-            sshKey = "/etc/nix/builder_ed25519";
+            sshKey = builderIdentityFile;
             publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
             inherit (nixosVmBasedLinuxBuilderCfg)
               mandatoryFeatures
