@@ -9,28 +9,7 @@ let
   cfg = config.determinateNix;
   nixosVmBasedLinuxBuilderCfg = cfg.nixosVmBasedLinuxBuilder;
 
-  inherit (lib)
-    all
-    concatMapStrings
-    concatStringsSep
-    filterAttrs
-    getExe'
-    hasAttr
-    literalExpression
-    mapAttrsToList
-    mkAfter
-    mkDefault
-    mkEnableOption
-    mkForce
-    mkIf
-    mkMerge
-    mkOption
-    mkRenamedOptionModule
-    optionalAttrs
-    optionalString
-    recursiveUpdate
-    types
-    ;
+  inherit (lib) types;
 
   inherit (import ./config/config.nix { inherit lib; }) mkCustomConfig;
 
@@ -83,12 +62,12 @@ in
 {
   # Rename the `determinate-nix` attribute to `determinateNix` to standardize on dromedary case.
   imports = [
-    (mkRenamedOptionModule [ "determinate-nix" ] [ "determinateNix" ])
+    (lib.mkRenamedOptionModule [ "determinate-nix" ] [ "determinateNix" ])
   ];
 
   options = {
     determinateNix = {
-      enable = mkOption {
+      enable = lib.mkOption {
         type = types.bool;
         default = true;
         description = ''
@@ -106,18 +85,18 @@ in
       };
 
       # Local build machines specified in `/etc/nix/machines`.
-      buildMachines = mkOption {
+      buildMachines = lib.mkOption {
         type = types.listOf (
           types.submodule {
             options = {
-              hostName = mkOption {
+              hostName = lib.mkOption {
                 type = types.str;
                 example = "nixbuilder.example.org";
                 description = ''
                   The hostname of the build machine.
                 '';
               };
-              protocol = mkOption {
+              protocol = lib.mkOption {
                 type = types.nullOr (
                   types.enum [
                     "ssh"
@@ -135,7 +114,7 @@ in
                   without a protocol which is for example used by hydra.
                 '';
               };
-              system = mkOption {
+              system = lib.mkOption {
                 type = types.nullOr types.str;
                 default = null;
                 example = "x86_64-linux";
@@ -146,7 +125,7 @@ in
                   both are set.
                 '';
               };
-              systems = mkOption {
+              systems = lib.mkOption {
                 type = types.listOf types.str;
                 default = [ ];
                 example = [
@@ -160,7 +139,7 @@ in
                   both are set.
                 '';
               };
-              sshUser = mkOption {
+              sshUser = lib.mkOption {
                 type = types.nullOr types.str;
                 default = null;
                 example = "builder";
@@ -171,7 +150,7 @@ in
                   {option}`determinateNix.customSettings.trusted-users`.
                 '';
               };
-              sshKey = mkOption {
+              sshKey = lib.mkOption {
                 type = types.nullOr types.str;
                 default = null;
                 example = "/root/.ssh/id_buildhost_builduser";
@@ -185,7 +164,7 @@ in
                   in the local filesystem, *not* to the nix store.
                 '';
               };
-              maxJobs = mkOption {
+              maxJobs = lib.mkOption {
                 type = types.int;
                 default = 1;
                 description = ''
@@ -195,7 +174,7 @@ in
                   machines.
                 '';
               };
-              speedFactor = mkOption {
+              speedFactor = lib.mkOption {
                 type = types.int;
                 default = 1;
                 description = ''
@@ -204,7 +183,7 @@ in
                   builders. Higher is faster.
                 '';
               };
-              mandatoryFeatures = mkOption {
+              mandatoryFeatures = lib.mkOption {
                 type = types.listOf types.str;
                 default = [ ];
                 example = [ "big-parallel" ];
@@ -215,7 +194,7 @@ in
                   {var}`supportedFeatures`.
                 '';
               };
-              supportedFeatures = mkOption {
+              supportedFeatures = lib.mkOption {
                 type = types.listOf types.str;
                 default = [ ];
                 example = [
@@ -228,7 +207,7 @@ in
                   list.
                 '';
               };
-              publicHostKey = mkOption {
+              publicHostKey = lib.mkOption {
                 type = types.nullOr types.str;
                 default = null;
                 description = ''
@@ -251,10 +230,10 @@ in
       };
 
       # Determinate Nixd configuration: https://docs.determinate.systems/determinate-nix#determinate-nixd-configuration
-      determinateNixd = mkOption {
+      determinateNixd = lib.mkOption {
         type = types.submodule {
           options = {
-            authentication.additionalNetrcSources = mkOption {
+            authentication.additionalNetrcSources = lib.mkOption {
               type = types.nullOr (
                 types.listOf (
                   types.oneOf [
@@ -268,7 +247,7 @@ in
                 A list of paths to `netrc` files that are combined by Determinate Nixd and used by Determinate Nix. These files must exist and not be in `/nix/store` or the daemon refuses to start.
               '';
             };
-            builder.state = mkOption {
+            builder.state = lib.mkOption {
               type = types.nullOr (
                 types.enum [
                   "disabled"
@@ -280,7 +259,7 @@ in
                 Whether Determinate Nix's native Linux builder is enabled.
               '';
             };
-            garbageCollector.strategy = mkOption {
+            garbageCollector.strategy = lib.mkOption {
               type = types.nullOr (
                 types.enum [
                   "automatic"
@@ -300,7 +279,7 @@ in
         '';
       };
 
-      distributedBuilds = mkOption {
+      distributedBuilds = lib.mkOption {
         type = types.bool;
         inherit (managedDefault "determinateNix.distributedBuilds" false) default defaultText;
         description = ''
@@ -310,7 +289,7 @@ in
       };
 
       # Environment variables for running Nix
-      envVars = mkOption {
+      envVars = lib.mkOption {
         type = types.attrs;
         internal = true;
         inherit (managedDefault "determinateNix.envVars" { }) default defaultText;
@@ -318,9 +297,9 @@ in
       };
 
       nixosVmBasedLinuxBuilder = {
-        enable = mkEnableOption "NixOS-VM-based Linux builder for macOS (distinct from Determinate Nix's native Linux builder, which we recommend)";
+        enable = lib.mkEnableOption "NixOS-VM-based Linux builder for macOS (distinct from Determinate Nix's native Linux builder, which we recommend)";
 
-        package = mkOption {
+        package = lib.mkOption {
           type = types.package;
           default = pkgs.darwin.linux-builder;
           defaultText = "pkgs.darwin.linux-builder";
@@ -336,10 +315,10 @@ in
           '';
         };
 
-        config = mkOption {
+        config = lib.mkOption {
           type = types.deferredModule;
           default = { };
-          example = literalExpression ''
+          example = lib.literalExpression ''
             ({ pkgs, ... }:
 
             {
@@ -352,7 +331,7 @@ in
           '';
         };
 
-        ephemeral = mkEnableOption ''
+        ephemeral = lib.mkEnableOption ''
           Wipe the builder's filesystem on every restart.
 
           This is disabled by default because maintaining the builder's Nix store means fewer
@@ -360,11 +339,11 @@ in
           state.
         '';
 
-        mandatoryFeatures = mkOption {
+        mandatoryFeatures = lib.mkOption {
           type = types.listOf types.str;
           default = [ ];
-          defaultText = literalExpression ''[]'';
-          example = literalExpression ''[ "big-parallel" ]'';
+          defaultText = lib.literalExpression ''[]'';
+          example = lib.literalExpression ''[ "big-parallel" ]'';
           description = ''
             A list of features mandatory for the Nixpkgs Linux builder. The builder is
             ignored for derivations that don't require all features in
@@ -375,7 +354,7 @@ in
           '';
         };
 
-        maxJobs = mkOption {
+        maxJobs = lib.mkOption {
           type = types.ints.positive;
           default = nixosVmBasedLinuxBuilderCfg.package.nixosConfig.virtualisation.cores;
           defaultText = ''
@@ -396,11 +375,11 @@ in
           '';
         };
 
-        protocol = mkOption {
+        protocol = lib.mkOption {
           type = types.str;
           default = "ssh-ng";
-          defaultText = literalExpression ''"ssh-ng"'';
-          example = literalExpression ''"ssh"'';
+          defaultText = lib.literalExpression ''"ssh-ng"'';
+          example = lib.literalExpression ''"ssh"'';
           description = ''
             The protocol used for communicating with the build machine.  Use
             `ssh-ng` if your remote builder and your local Nix version support that
@@ -411,10 +390,10 @@ in
           '';
         };
 
-        speedFactor = mkOption {
+        speedFactor = lib.mkOption {
           type = types.ints.positive;
           default = 1;
-          defaultText = literalExpression ''1'';
+          defaultText = lib.literalExpression ''1'';
           description = ''
             The relative speed of the Nixpkgs Linux builder. This is an arbitrary integer
             that indicates the speed of this builder, relative to other
@@ -424,15 +403,15 @@ in
           '';
         };
 
-        supportedFeatures = mkOption {
+        supportedFeatures = lib.mkOption {
           type = types.listOf types.str;
           default = [
             "kvm"
             "benchmark"
             "big-parallel"
           ];
-          defaultText = literalExpression ''[ "kvm" "benchmark" "big-parallel" ]'';
-          example = literalExpression ''[ "kvm" "big-parallel" ]'';
+          defaultText = lib.literalExpression ''[ "kvm" "benchmark" "big-parallel" ]'';
+          example = lib.literalExpression ''[ "kvm" "big-parallel" ]'';
           description = ''
             A list of features supported by the Nixpkgs Linux builder. The builder will
             be ignored for derivations that require features not in this
@@ -442,13 +421,13 @@ in
           '';
         };
 
-        systems = mkOption {
+        systems = lib.mkOption {
           type = types.listOf types.str;
           default = [ nixosVmBasedLinuxBuilderCfg.package.nixosConfig.nixpkgs.hostPlatform.system ];
           defaultText = ''
             The `nixpkgs.hostPlatform.system` of the build machine's final NixOS configuration.
           '';
-          example = literalExpression ''
+          example = lib.literalExpression ''
             [
               "x86_64-linux"
               "aarch64-linux"
@@ -461,7 +440,7 @@ in
           '';
         };
 
-        workingDirectory = mkOption {
+        workingDirectory = lib.mkOption {
           type = types.str;
           default = "/var/lib/linux-builder";
           description = ''
@@ -470,7 +449,7 @@ in
         };
       };
 
-      registry = mkOption {
+      registry = lib.mkOption {
         type = types.attrsOf (
           types.submodule (
             let
@@ -486,7 +465,7 @@ in
             { config, name, ... }:
             {
               options = {
-                from = mkOption {
+                from = lib.mkOption {
                   type = referenceAttrs;
                   example = {
                     type = "indirect";
@@ -494,7 +473,7 @@ in
                   };
                   description = "The flake reference to be rewritten.";
                 };
-                to = mkOption {
+                to = lib.mkOption {
                   type = referenceAttrs;
                   example = {
                     type = "github";
@@ -503,15 +482,15 @@ in
                   };
                   description = "The flake reference {option}`from` is rewritten to.";
                 };
-                flake = mkOption {
+                flake = lib.mkOption {
                   type = types.nullOr types.attrs;
                   default = null;
-                  example = literalExpression "nixpkgs";
+                  example = lib.literalExpression "nixpkgs";
                   description = ''
                     The flake input {option}`from` is rewritten to.
                   '';
                 };
-                exact = mkOption {
+                exact = lib.mkOption {
                   type = types.bool;
                   default = true;
                   description = ''
@@ -522,17 +501,17 @@ in
                 };
               };
               config = {
-                from = mkDefault {
+                from = lib.mkDefault {
                   type = "indirect";
                   id = name;
                 };
-                to = mkIf (config.flake != null) (
-                  mkDefault (
+                to = lib.mkIf (config.flake != null) (
+                  lib.mkDefault (
                     {
                       type = "path";
                       path = config.flake.outPath;
                     }
-                    // filterAttrs (
+                    // lib.filterAttrs (
                       n: _: n == "lastModified" || n == "rev" || n == "revCount" || n == "narHash"
                     ) config.flake
                   )
@@ -548,12 +527,12 @@ in
         '';
       };
 
-      customSettings = mkOption {
+      customSettings = lib.mkOption {
         type = types.submodule {
           freeformType = semanticConfType;
 
           options = {
-            auto-optimise-store = mkOption {
+            auto-optimise-store = lib.mkOption {
               type = types.bool;
               default = false;
               example = true;
@@ -567,7 +546,7 @@ in
               '';
             };
 
-            cores = mkOption {
+            cores = lib.mkOption {
               type = types.int;
               default = 0;
               example = 64;
@@ -581,7 +560,7 @@ in
               '';
             };
 
-            extra-sandbox-paths = mkOption {
+            extra-sandbox-paths = lib.mkOption {
               type = types.listOf types.str;
               default = [ ];
               example = [
@@ -594,7 +573,7 @@ in
               '';
             };
 
-            sandbox = mkOption {
+            sandbox = lib.mkOption {
               type = types.either types.bool (types.enum [ "relaxed" ]);
               default = false;
               description = ''
@@ -607,7 +586,7 @@ in
               '';
             };
 
-            trusted-users = mkOption {
+            trusted-users = lib.mkOption {
               type = types.listOf types.str;
               inherit (managedDefault "determinateNix.trusted-users" [ ]) default defaultText;
               example = [
@@ -632,219 +611,229 @@ in
     };
   };
 
-  config = mkIf (cfg.enable) (mkMerge [
-    # Nixpkgs Linux builder enabled
-    (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
-      assertions = [
-        {
-          assertion = config.determinateNix.enable;
-          message = ''
-            Setting `determinateNix.nixosVmBasedLinuxBuilder.enable = true` requires you to set `determinateNix.enable = true` as well.
-          '';
-        }
-      ];
-
-      system.activationScripts.preActivation.text =
-        let
-          directory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
-        in
-        ''
-          # Migrate if using the old working directory
-          if [ -e /var/lib/darwin-builder ] && [ ! -e ${directory} ]; then
-            mv /var/lib/darwin-builder ${directory}
-          fi
-
-          mkdir -p ${directory}
-        '';
-
-      launchd.daemons.linux-builder = {
-        environment.NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
-
-        # create-builder uses TMPDIR to share files with the builder, notably certs.
-        # macOS will clean up files in /tmp automatically that haven't been accessed in 3+ days.
-        # If we let it use /tmp, leaving the computer asleep for 3 days makes the certs vanish.
-        # So we'll use /run/org.nixos.linux-builder instead and clean it up ourselves.
-        script = ''
-          export TMPDIR=/run/org.nixos.linux-builder USE_TMPDIR=1
-          rm -rf $TMPDIR
-          mkdir -p $TMPDIR
-          trap "rm -rf $TMPDIR" EXIT
-          ${optionalString nixosVmBasedLinuxBuilderCfg.ephemeral ''
-            rm -f ${nixosVmBasedLinuxBuilderCfg.workingDirectory}/${nixosVmBasedLinuxBuilderCfg.package.nixosConfig.networking.hostName}.qcow2
-          ''}
-          ${getExe' nixosVmBasedLinuxBuilderCfg.package "create-builder"}
-        '';
-
-        serviceConfig =
-          let
-            logFile = "/var/log/nixos-based-vm-builder.log";
-          in
+  config = lib.mkIf (cfg.enable) (
+    lib.mkMerge [
+      # Nixpkgs Linux builder enabled
+      (lib.mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
+        assertions = [
           {
-            KeepAlive = true;
-            RunAtLoad = true;
-            StandardErrorPath = logFile;
-            StandardOutPath = logFile;
-            WorkingDirectory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
-          };
-      };
-
-      environment.etc."ssh/ssh_config.d/100-linux-builder.conf".text = ''
-        Host linux-builder
-          User builder
-          Hostname localhost
-          HostKeyAlias linux-builder
-          Port 31022
-          IdentityFile ${builderIdentityFile}
-      '';
-
-      # Override Determinate Nix config
-      determinateNix = {
-        buildMachines = [
-          {
-            hostName = "linux-builder";
-            sshUser = "builder";
-            sshKey = builderIdentityFile;
-            publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
-            inherit (nixosVmBasedLinuxBuilderCfg)
-              mandatoryFeatures
-              maxJobs
-              protocol
-              speedFactor
-              supportedFeatures
-              systems
-              ;
+            assertion = config.determinateNix.enable;
+            message = ''
+              Setting `determinateNix.nixosVmBasedLinuxBuilder.enable = true` requires you to set `determinateNix.enable = true` as well.
+            '';
           }
         ];
-        # Override Determinate Nixd config to disable the native Linux builder
-        determinateNixd.builder.state = "disabled";
-        distributedBuilds = true;
-        customSettings.builders-use-substitutes = true;
-      };
-    })
 
-    # Nixpkgs Linux builder disabled
-    (mkIf (!nixosVmBasedLinuxBuilderCfg.enable) {
-      system.activationScripts.preActivation.text = ''
-        rm -rf ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
-      '';
-    })
+        system.activationScripts.preActivation.text =
+          let
+            directory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
+          in
+          ''
+            # Migrate if using the old working directory
+            if [ -e /var/lib/darwin-builder ] && [ ! -e ${directory} ]; then
+              mv /var/lib/darwin-builder ${directory}
+            fi
 
-    {
-      assertions = [
-        {
-          assertion = all (key: !hasAttr key cfg.customSettings) disallowedOptions;
-          message = ''
-            These settings are not allowed in `determinateNix.customSettings`:
-              ${concatStringsSep ", " disallowedOptions}
+            mkdir -p ${directory}
           '';
-        }
-      ];
 
-      warnings = [
-        (mkIf (
-          !cfg.distributedBuilds && cfg.buildMachines != [ ]
-        ) "`determinateNix.distributedBuilds` is not enabled, thus build machines aren't configured.")
-      ];
+        launchd.daemons.linux-builder = {
+          environment.NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 
-      # Disable nix-darwin's internal mechanisms for handling Nix configuration
-      nix.enable = mkForce false;
+          # create-builder uses TMPDIR to share files with the builder, notably certs.
+          # macOS will clean up files in /tmp automatically that haven't been accessed in 3+ days.
+          # If we let it use /tmp, leaving the computer asleep for 3 days makes the certs vanish.
+          # So we'll use /run/org.nixos.linux-builder instead and clean it up ourselves.
+          script = ''
+            export TMPDIR=/run/org.nixos.linux-builder USE_TMPDIR=1
+            rm -rf $TMPDIR
+            mkdir -p $TMPDIR
+            trap "rm -rf $TMPDIR" EXIT
+            ${lib.optionalString nixosVmBasedLinuxBuilderCfg.ephemeral ''
+              rm -f ${nixosVmBasedLinuxBuilderCfg.workingDirectory}/${nixosVmBasedLinuxBuilderCfg.package.nixosConfig.networking.hostName}.qcow2
+            ''}
+            ${lib.getExe' nixosVmBasedLinuxBuilderCfg.package "create-builder"}
+          '';
 
-      environment.etc.${customConfFile}.text = concatStringsSep "\n" (
-        [
-          "# This custom configuration file for Determinate Nix is generated by the determinate module for nix-darwin."
-          "# Update your custom settings by changing your nix-darwin configuration, not by modifying this file directly."
-          ""
-        ]
-        ++ mkCustomConfig cfg.customSettings
-      );
-
-      # Set up the environment variables for running Nix
-      environment.variables = cfg.envVars;
-
-      # Create the Nix flake registry
-      environment.etc.${registryFile} = mkIf (cfg.registry != { }) {
-        text = builtins.toJSON {
-          version = 2;
-          flakes = mapAttrsToList (n: v: { inherit (v) from to exact; }) cfg.registry;
+          serviceConfig =
+            let
+              logFile = "/var/log/nixos-based-vm-builder.log";
+            in
+            {
+              KeepAlive = true;
+              RunAtLoad = true;
+              StandardErrorPath = logFile;
+              StandardOutPath = logFile;
+              WorkingDirectory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
+            };
         };
-      };
 
-      # Determinate Nixd configuration
-      environment.etc."determinate/config.json" =
-        let
-          dnixd = cfg.determinateNixd;
+        environment.etc."ssh/ssh_config.d/100-linux-builder.conf".text = ''
+          Host linux-builder
+            User builder
+            Hostname localhost
+            HostKeyAlias linux-builder
+            Port 31022
+            IdentityFile ${builderIdentityFile}
+        '';
 
-          # Only include non-null attributes in the config file
-          explicitlySetAttrs = builtins.foldl' recursiveUpdate { } [
-            (optionalAttrs (dnixd.authentication.additionalNetrcSources != null) {
-              authentication = {
-                additionalNetrcSources = dnixd.authentication.additionalNetrcSources;
-              };
-            })
-            (optionalAttrs (dnixd.builder.state != null) {
-              builder = {
-                state = dnixd.builder.state;
-              };
-            })
-            (optionalAttrs (dnixd.garbageCollector.strategy != null) {
-              garbageCollector = {
-                strategy = dnixd.garbageCollector.strategy;
-              };
-            })
+        # Override Determinate Nix config
+        determinateNix = {
+          buildMachines = [
+            {
+              hostName = "linux-builder";
+              sshUser = "builder";
+              sshKey = builderIdentityFile;
+              publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
+              inherit (nixosVmBasedLinuxBuilderCfg)
+                mandatoryFeatures
+                maxJobs
+                protocol
+                speedFactor
+                supportedFeatures
+                systems
+                ;
+            }
           ];
-        in
-        mkIf (explicitlySetAttrs != { }) {
-          text = builtins.toJSON explicitlySetAttrs;
+          # Override Determinate Nixd config to disable the native Linux builder
+          determinateNixd.builder.state = "disabled";
+          distributedBuilds = true;
+          customSettings.builders-use-substitutes = true;
+        };
+      })
+
+      # Nixpkgs Linux builder disabled
+      (lib.mkIf (!nixosVmBasedLinuxBuilderCfg.enable) {
+        system.activationScripts.preActivation.text = ''
+          rm -rf ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
+        '';
+      })
+
+      {
+        assertions = [
+          {
+            assertion = lib.all (key: !lib.hasAttr key cfg.customSettings) disallowedOptions;
+            message = ''
+              These settings are not allowed in `determinateNix.customSettings`:
+                ${lib.concatStringsSep ", " disallowedOptions}
+            '';
+          }
+        ];
+
+        warnings = [
+          (lib.mkIf (
+            !cfg.distributedBuilds && cfg.buildMachines != [ ]
+          ) "`determinateNix.distributedBuilds` is not enabled, thus build machines aren't configured.")
+        ];
+
+        # Disable nix-darwin's internal mechanisms for handling Nix configuration
+        nix.enable = lib.mkForce false;
+
+        environment.etc.${customConfFile}.text = lib.concatStringsSep "\n" (
+          [
+            "# This custom configuration file for Determinate Nix is generated by the determinate module for nix-darwin."
+            "# Update your custom settings by changing your nix-darwin configuration, not by modifying this file directly."
+            ""
+          ]
+          ++ mkCustomConfig cfg.customSettings
+        );
+
+        # Set up the environment variables for running Nix
+        environment.variables = cfg.envVars;
+
+        # Create the Nix flake registry
+        environment.etc.${registryFile} = lib.mkIf (cfg.registry != { }) {
+          text = builtins.toJSON {
+            version = 2;
+            flakes = lib.mapAttrsToList (n: v: { inherit (v) from to exact; }) cfg.registry;
+          };
         };
 
-      # List of machines for distributed Nix builds in the format
-      # expected by build-remote.pl.
-      environment.etc."nix/machines" = mkIf (cfg.buildMachines != [ ]) {
-        text = concatMapStrings (
-          machine:
-          (concatStringsSep " " ([
-            "${optionalString (machine.protocol != null) "${machine.protocol}://"}${
-              optionalString (machine.sshUser != null) "${machine.sshUser}@"
-            }${machine.hostName}"
-            (
-              if machine.system != null then
-                machine.system
-              else if machine.systems != [ ] then
-                concatStringsSep "," machine.systems
-              else
-                "-"
-            )
-            (if machine.sshKey != null then machine.sshKey else "-")
-            (toString machine.maxJobs)
-            (toString machine.speedFactor)
-            (
-              let
-                res = (machine.supportedFeatures ++ machine.mandatoryFeatures);
-              in
-              if (res == [ ]) then "-" else (concatStringsSep "," res)
-            )
-            (
-              let
-                res = machine.mandatoryFeatures;
-              in
-              if (res == [ ]) then "-" else (concatStringsSep "," machine.mandatoryFeatures)
-            )
-            (if machine.publicHostKey != null then machine.publicHostKey else "-")
-          ]))
-          + "\n"
-        ) cfg.buildMachines;
-      };
+        # Determinate Nixd configuration
+        environment.etc."determinate/config.json" =
+          let
+            dnixd = cfg.determinateNixd;
 
-      determinateNix.customSettings = mkMerge [
-        (mkIf (!cfg.distributedBuilds) { builders = null; })
-        (mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
-        (mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
-          # To enable fetching the cached NixOS VM
-          trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
-          trusted-users = [ "root" ];
-          substituters = mkAfter [ "https://cache.nixos.org/" ];
-        })
-      ];
-    }
-  ]);
+            # Only include non-null attributes in the config file
+            explicitlySetAttrs =
+              let
+                fragmentFor =
+                  path:
+                  let
+                    v = lib.getAttrFromPath path dnixd;
+                  in
+                  lib.optionalAttrs (v != null) (lib.setAttrByPath path v);
+              in
+              builtins.foldl' lib.recursiveUpdate { } (
+                map fragmentFor [
+                  [
+                    "authentication"
+                    "additionalNetrcSources"
+                  ]
+                  [
+                    "builder"
+                    "state"
+                  ]
+                  [
+                    "garbageCollector"
+                    "strategy"
+                  ]
+                ]
+              );
+          in
+          lib.mkIf (explicitlySetAttrs != { }) {
+            text = builtins.toJSON explicitlySetAttrs;
+          };
+
+        # List of machines for distributed Nix builds in the format
+        # expected by build-remote.pl.
+        environment.etc."nix/machines" = lib.mkIf (cfg.buildMachines != [ ]) {
+          text = lib.concatMapStrings (
+            machine:
+            (lib.concatStringsSep " " ([
+              "${lib.optionalString (machine.protocol != null) "${machine.protocol}://"}${
+                lib.optionalString (machine.sshUser != null) "${machine.sshUser}@"
+              }${machine.hostName}"
+              (
+                if machine.system != null then
+                  machine.system
+                else if machine.systems != [ ] then
+                  lib.concatStringsSep "," machine.systems
+                else
+                  "-"
+              )
+              (if machine.sshKey != null then machine.sshKey else "-")
+              (toString machine.maxJobs)
+              (toString machine.speedFactor)
+              (
+                let
+                  res = (machine.supportedFeatures ++ machine.mandatoryFeatures);
+                in
+                if (res == [ ]) then "-" else (lib.concatStringsSep "," res)
+              )
+              (
+                let
+                  res = machine.mandatoryFeatures;
+                in
+                if (res == [ ]) then "-" else (lib.concatStringsSep "," machine.mandatoryFeatures)
+              )
+              (if machine.publicHostKey != null then machine.publicHostKey else "-")
+            ]))
+            + "\n"
+          ) cfg.buildMachines;
+        };
+
+        determinateNix.customSettings = lib.mkMerge [
+          (lib.mkIf (!cfg.distributedBuilds) { builders = null; })
+          (lib.mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
+          (lib.mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
+            # To enable fetching the cached NixOS VM
+            trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
+            trusted-users = [ "root" ];
+            substituters = lib.mkAfter [ "https://cache.nixos.org/" ];
+          })
+        ];
+      }
+    ]
+  );
 }
