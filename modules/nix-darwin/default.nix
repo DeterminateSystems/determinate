@@ -649,9 +649,7 @@ in
         '';
 
       launchd.daemons.linux-builder = {
-        environment = {
-          inherit (config.environment.variables) NIX_SSL_CERT_FILE;
-        };
+        environment.NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 
         # create-builder uses TMPDIR to share files with the builder, notably certs.
         # macOS will clean up files in /tmp automatically that haven't been accessed in 3+ days.
