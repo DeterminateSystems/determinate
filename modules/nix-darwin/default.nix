@@ -448,7 +448,7 @@ in
           description = ''
             This option specifies system types the build machine can execute derivations on.
 
-            This sets the corresponding `nix.buildMachines.*.systems` option.
+            This sets the corresponding `determinateNix.buildMachines.*.systems` option.
           '';
         };
 
@@ -508,7 +508,7 @@ in
                   description = ''
                     Whether the {option}`from` reference needs to match exactly. If set,
                     a {option}`from` reference like `nixpkgs` does not
-                    match with a reference like `nixpkgs/nixos-20.03`.
+                    match with a reference like `nixpkgs/nixos-25.05`.
                   '';
                 };
               };
