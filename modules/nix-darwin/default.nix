@@ -630,7 +630,7 @@ in
         {
           assertion = config.determinateNix.enable;
           message = ''
-            Setting `determinateNix.nixosVmBasedLinuxBUilder.enable = true` requires you to set `determinateNix.enable = true` as well.
+            Setting `determinateNix.nixosVmBasedLinuxBuilder.enable = true` requires you to set `determinateNix.enable = true` as well.
           '';
         }
       ];
