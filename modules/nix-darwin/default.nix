@@ -715,6 +715,8 @@ in
               ;
           }
         ];
+        # Override Determinate Nixd config to disable the native Linux builder
+        determinateNixd.builder.state = "disabled";
         distributedBuilds = true;
         customSettings.builders-use-substitutes = true;
       };
