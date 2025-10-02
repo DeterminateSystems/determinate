@@ -26,7 +26,9 @@ let
     mkMerge
     mkOption
     mkRenamedOptionModule
+    optionalAttrs
     optionalString
+    recursiveUpdate
     types
     ;
 
@@ -253,33 +255,39 @@ in
         type = types.submodule {
           options = {
             authentication.additionalNetrcSources = mkOption {
-              type = types.listOf (
-                types.oneOf [
-                  types.path
-                  types.str
-                ]
+              type = types.nullOr (
+                types.listOf (
+                  types.oneOf [
+                    types.path
+                    types.str
+                  ]
+                )
               );
-              default = [ ];
+              default = null;
               description = ''
                 A list of paths to `netrc` files that are combined by Determinate Nixd and used by Determinate Nix. These files must exist and not be in `/nix/store` or the daemon refuses to start.
               '';
             };
             builder.state = mkOption {
-              type = types.enum [
-                "disabled"
-                "enabled"
-              ];
-              default = if nixosVmBasedLinuxBuilderCfg.enable then "disabled" else "enabled";
+              type = types.nullOr (
+                types.enum [
+                  "disabled"
+                  "enabled"
+                ]
+              );
+              default = null;
               description = ''
                 Whether Determinate Nix's native Linux builder is enabled.
               '';
             };
             garbageCollector.strategy = mkOption {
-              type = types.enum [
-                "automatic"
-                "disabled"
-              ];
-              default = "automatic";
+              type = types.nullOr (
+                types.enum [
+                  "automatic"
+                  "disabled"
+                ]
+              );
+              default = null;
               description = ''
                 The garbage collection strategy used by Determinate Nixd. `automatic` means that Determinate Nixd automatically collects garbage in the background while `disabled` means no garbage collection.
               '';
@@ -760,7 +768,32 @@ in
       };
 
       # Determinate Nixd configuration
-      environment.etc."determinate/config.json".text = builtins.toJSON cfg.determinateNixd;
+      environment.etc."determinate/config.json" =
+        let
+          dnixd = cfg.determinateNixd;
+
+          # Only include non-null attributes in the config file
+          explicitlySetAttrs = builtins.foldl' recursiveUpdate { } [
+            (optionalAttrs (dnixd.authentication.additionalNetrcSources != null) {
+              authentication = {
+                additionalNetrcSources = dnixd.authentication.additionalNetrcSources;
+              };
+            })
+            (optionalAttrs (dnixd.builder.state != null) {
+              builder = {
+                state = dnixd.builder.state;
+              };
+            })
+            (optionalAttrs (dnixd.garbageCollector.strategy != null) {
+              garbageCollector = {
+                strategy = dnixd.garbageCollector.strategy;
+              };
+            })
+          ];
+        in
+        mkIf (explicitlySetAttrs != { }) {
+          text = builtins.toJSON explicitlySetAttrs;
+        };
 
       # List of machines for distributed Nix builds in the format
       # expected by build-remote.pl.
