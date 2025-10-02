@@ -299,6 +299,14 @@ in
       nixosVmBasedLinuxBuilder = {
         enable = lib.mkEnableOption "NixOS-VM-based Linux builder for macOS (distinct from Determinate Nix's native Linux builder, which we recommend)";
 
+        hostName = lib.mkOption {
+          type = types.str;
+          default = "linux-builder";
+          description = ''
+            The hostname for the NixOS-VM-based Linux builder.
+          '';
+        };
+
         package = lib.mkOption {
           type = types.package;
           default = pkgs.darwin.linux-builder;
@@ -442,7 +450,7 @@ in
 
         workingDirectory = lib.mkOption {
           type = types.str;
-          default = "/var/lib/linux-builder";
+          default = "/var/lib/${nixosVmBasedLinuxBuilderCfg.hostName}";
           description = ''
             The working directory of the Linux builder daemon process.
           '';
@@ -637,7 +645,7 @@ in
             mkdir -p ${directory}
           '';
 
-        launchd.daemons.linux-builder = {
+        launchd.daemons.${nixosVmBasedLinuxBuilderCfg.hostName} = {
           environment.NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 
           # create-builder uses TMPDIR to share files with the builder, notably certs.
@@ -645,7 +653,7 @@ in
           # If we let it use /tmp, leaving the computer asleep for 3 days makes the certs vanish.
           # So we'll use /run/org.nixos.linux-builder instead and clean it up ourselves.
           script = ''
-            export TMPDIR=/run/org.nixos.linux-builder USE_TMPDIR=1
+            export TMPDIR=/run/org.nixos.${nixosVmBasedLinuxBuilderCfg.hostName} USE_TMPDIR=1
             rm -rf $TMPDIR
             mkdir -p $TMPDIR
             trap "rm -rf $TMPDIR" EXIT
@@ -668,11 +676,11 @@ in
             };
         };
 
-        environment.etc."ssh/ssh_config.d/100-linux-builder.conf".text = ''
-          Host linux-builder
+        environment.etc."ssh/ssh_config.d/100-${nixosVmBasedLinuxBuilderCfg.hostName}.conf".text = ''
+          Host ${nixosVmBasedLinuxBuilderCfg.hostName}
             User builder
             Hostname localhost
-            HostKeyAlias linux-builder
+            HostKeyAlias ${nixosVmBasedLinuxBuilderCfg.hostName}
             Port 31022
             IdentityFile ${builderIdentityFile}
         '';
@@ -681,7 +689,7 @@ in
         determinateNix = {
           buildMachines = [
             {
-              hostName = "linux-builder";
+              hostName = nixosVmBasedLinuxBuilderCfg.hostName;
               sshUser = "builder";
               sshKey = builderIdentityFile;
               publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
@@ -765,6 +773,7 @@ in
                   lib.optionalAttrs (v != null) (lib.setAttrByPath path v);
               in
               builtins.foldl' lib.recursiveUpdate { } (
+                # Keep this list up to date with the structure of the Determinate Nixd config file
                 map fragmentFor [
                   [
                     "authentication"
@@ -824,7 +833,6 @@ in
         };
 
         determinateNix.customSettings = lib.mkMerge [
-          (lib.mkIf (!cfg.distributedBuilds) { builders = null; })
           (lib.mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
           (lib.mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
             # To enable fetching the cached NixOS VM
