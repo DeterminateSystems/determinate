@@ -540,20 +540,6 @@ in
           freeformType = semanticConfType;
 
           options = {
-            auto-optimise-store = lib.mkOption {
-              type = types.bool;
-              default = false;
-              example = true;
-              description = ''
-                If set to `true`, Determinate Nix automatically detects files in the store
-                that have identical contents and replaces them with hard links to a single copy.
-                This saves disk space. If set to `false` (the default), you can enable
-                {option}`determinateNix.optimise.automatic` to run {command}`nix-store --optimise`
-                periodically to get rid of duplicate files. You can also run
-                {command}`nix-store --optimise` manually.
-              '';
-            };
-
             cores = lib.mkOption {
               type = types.int;
               default = 0;
