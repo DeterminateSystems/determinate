@@ -132,7 +132,6 @@ Here's an example nix-darwin configuration that writes custom settings:
             enable = true;
             # Custom settings written to /etc/nix/nix.custom.conf
             customSettings = {
-              auto-optimise-store = true;
               flake-registry = "/etc/nix/flake-registry.json";
               sandbox = true;
             };
