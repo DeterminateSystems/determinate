@@ -66,6 +66,7 @@
 
             packages = with pkgs; [
               lychee
+              statix
               self.formatter.${system}
 
               (writeScriptBin "check-readme-links" ''

@@ -605,10 +605,10 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.enable) (
+  config = lib.mkIf cfg.enable (
     lib.mkMerge [
       # Nixpkgs Linux builder enabled
-      (lib.mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
+      (lib.mkIf nixosVmBasedLinuxBuilderCfg.enable {
         assertions = [
           {
             assertion = config.determinateNix.enable;
@@ -675,7 +675,7 @@ in
         determinateNix = {
           buildMachines = [
             {
-              hostName = nixosVmBasedLinuxBuilderCfg.hostName;
+              inherit (nixosVmBasedLinuxBuilderCfg) hostName;
               sshUser = "builder";
               sshKey = builderIdentityFile;
               publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=";
@@ -785,7 +785,7 @@ in
         environment.etc."nix/machines" = lib.mkIf (cfg.buildMachines != [ ]) {
           text = lib.concatMapStrings (
             machine:
-            (lib.concatStringsSep " " ([
+            (lib.concatStringsSep " " [
               "${lib.optionalString (machine.protocol != null) "${machine.protocol}://"}${
                 lib.optionalString (machine.sshUser != null) "${machine.sshUser}@"
               }${machine.hostName}"
@@ -802,7 +802,7 @@ in
               (toString machine.speedFactor)
               (
                 let
-                  res = (machine.supportedFeatures ++ machine.mandatoryFeatures);
+                  res = machine.supportedFeatures ++ machine.mandatoryFeatures;
                 in
                 if (res == [ ]) then "-" else (lib.concatStringsSep "," res)
               )
@@ -813,14 +813,14 @@ in
                 if (res == [ ]) then "-" else (lib.concatStringsSep "," machine.mandatoryFeatures)
               )
               (if machine.publicHostKey != null then machine.publicHostKey else "-")
-            ]))
+            ])
             + "\n"
           ) cfg.buildMachines;
         };
 
         determinateNix.customSettings = lib.mkMerge [
           (lib.mkIf (cfg.registry != { }) { flake-registry = "/etc/${registryFile}"; })
-          (lib.mkIf (nixosVmBasedLinuxBuilderCfg.enable) {
+          (lib.mkIf nixosVmBasedLinuxBuilderCfg.enable {
             # To enable fetching the cached NixOS VM
             trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
             trusted-users = [ "root" ];
