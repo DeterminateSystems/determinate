@@ -741,85 +741,85 @@ in
                 flakes = lib.mapAttrsToList (n: v: { inherit (v) from to exact; }) cfg.registry;
               };
             };
+
+            # Determinate Nixd configuration
+            "determinate/config.json" =
+              let
+                dnixd = cfg.determinateNixd;
+
+                # Only include non-null attributes in the config file
+                explicitlySetAttrs =
+                  let
+                    fragmentFor =
+                      path:
+                      let
+                        v = lib.getAttrFromPath path dnixd;
+                      in
+                      lib.optionalAttrs (v != null) (lib.setAttrByPath path v);
+                  in
+                  builtins.foldl' lib.recursiveUpdate { } (
+                    # Keep this list up to date with the structure of the Determinate Nixd config file
+                    map fragmentFor [
+                      [
+                        "authentication"
+                        "additionalNetrcSources"
+                      ]
+                      [
+                        "builder"
+                        "state"
+                      ]
+                      [
+                        "garbageCollector"
+                        "strategy"
+                      ]
+                    ]
+                  );
+              in
+              lib.mkIf (explicitlySetAttrs != { }) {
+                text = builtins.toJSON explicitlySetAttrs;
+              };
+
+            # List of machines for distributed Nix builds in the format
+            # expected by build-remote.pl.
+            "nix/machines" = lib.mkIf (cfg.buildMachines != [ ]) {
+              text = lib.concatMapStrings (
+                machine:
+                (lib.concatStringsSep " " [
+                  "${lib.optionalString (machine.protocol != null) "${machine.protocol}://"}${
+                    lib.optionalString (machine.sshUser != null) "${machine.sshUser}@"
+                  }${machine.hostName}"
+                  (
+                    if machine.system != null then
+                      machine.system
+                    else if machine.systems != [ ] then
+                      lib.concatStringsSep "," machine.systems
+                    else
+                      "-"
+                  )
+                  (if machine.sshKey != null then machine.sshKey else "-")
+                  (toString machine.maxJobs)
+                  (toString machine.speedFactor)
+                  (
+                    let
+                      res = machine.supportedFeatures ++ machine.mandatoryFeatures;
+                    in
+                    if (res == [ ]) then "-" else (lib.concatStringsSep "," res)
+                  )
+                  (
+                    let
+                      res = machine.mandatoryFeatures;
+                    in
+                    if (res == [ ]) then "-" else (lib.concatStringsSep "," machine.mandatoryFeatures)
+                  )
+                  (if machine.publicHostKey != null then machine.publicHostKey else "-")
+                ])
+                + "\n"
+              ) cfg.buildMachines;
+            };
           };
 
           # Set up the environment variables for running Nix
           variables = cfg.envVars;
-        };
-
-        # Determinate Nixd configuration
-        environment.etc."determinate/config.json" =
-          let
-            dnixd = cfg.determinateNixd;
-
-            # Only include non-null attributes in the config file
-            explicitlySetAttrs =
-              let
-                fragmentFor =
-                  path:
-                  let
-                    v = lib.getAttrFromPath path dnixd;
-                  in
-                  lib.optionalAttrs (v != null) (lib.setAttrByPath path v);
-              in
-              builtins.foldl' lib.recursiveUpdate { } (
-                # Keep this list up to date with the structure of the Determinate Nixd config file
-                map fragmentFor [
-                  [
-                    "authentication"
-                    "additionalNetrcSources"
-                  ]
-                  [
-                    "builder"
-                    "state"
-                  ]
-                  [
-                    "garbageCollector"
-                    "strategy"
-                  ]
-                ]
-              );
-          in
-          lib.mkIf (explicitlySetAttrs != { }) {
-            text = builtins.toJSON explicitlySetAttrs;
-          };
-
-        # List of machines for distributed Nix builds in the format
-        # expected by build-remote.pl.
-        environment.etc."nix/machines" = lib.mkIf (cfg.buildMachines != [ ]) {
-          text = lib.concatMapStrings (
-            machine:
-            (lib.concatStringsSep " " [
-              "${lib.optionalString (machine.protocol != null) "${machine.protocol}://"}${
-                lib.optionalString (machine.sshUser != null) "${machine.sshUser}@"
-              }${machine.hostName}"
-              (
-                if machine.system != null then
-                  machine.system
-                else if machine.systems != [ ] then
-                  lib.concatStringsSep "," machine.systems
-                else
-                  "-"
-              )
-              (if machine.sshKey != null then machine.sshKey else "-")
-              (toString machine.maxJobs)
-              (toString machine.speedFactor)
-              (
-                let
-                  res = machine.supportedFeatures ++ machine.mandatoryFeatures;
-                in
-                if (res == [ ]) then "-" else (lib.concatStringsSep "," res)
-              )
-              (
-                let
-                  res = machine.mandatoryFeatures;
-                in
-                if (res == [ ]) then "-" else (lib.concatStringsSep "," machine.mandatoryFeatures)
-              )
-              (if machine.publicHostKey != null then machine.publicHostKey else "-")
-            ])
-            + "\n"
-          ) cfg.buildMachines;
         };
 
         determinateNix.customSettings = lib.mkMerge [
