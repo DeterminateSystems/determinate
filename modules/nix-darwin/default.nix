@@ -695,13 +695,6 @@ in
         };
       })
 
-      # Nixpkgs Linux builder disabled
-      (lib.mkIf (!nixosVmBasedLinuxBuilderCfg.enable) {
-        system.activationScripts.preActivation.text = ''
-          rm -rf ${nixosVmBasedLinuxBuilderCfg.workingDirectory}
-        '';
-      })
-
       {
         assertions = [
           {
