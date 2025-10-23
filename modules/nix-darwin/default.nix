@@ -33,7 +33,6 @@ let
 
   # Settings that Determinate Nix handles for you
   disallowedOptions = [
-    "always-allow-substitutes"
     "bash-prompt-prefix"
     "external-builders"
     "extra-nix-path"
