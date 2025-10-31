@@ -218,7 +218,7 @@ in
             };
           }
         );
-        inherit (managedDefault "determinateNix.buildMachines" (literalExpression "[ ]"))
+        inherit (managedDefault "determinateNix.buildMachines" (lib.literalExpression "[ ]"))
           default
           defaultText
           ;
@@ -283,7 +283,7 @@ in
 
       distributedBuilds = lib.mkOption {
         type = types.bool;
-        inherit (managedDefault "determinateNix.distributedBuilds" (literalExpression "false"))
+        inherit (managedDefault "determinateNix.distributedBuilds" (lib.literalExpression "false"))
           default
           defaultText
           ;
@@ -297,7 +297,7 @@ in
       envVars = lib.mkOption {
         type = types.attrs;
         internal = true;
-        inherit (managedDefault "determinateNix.envVars" (literalExpression "{ }")) default defaultText;
+        inherit (managedDefault "determinateNix.envVars" (lib.literalExpression "{ }")) default defaultText;
         description = "Environment variables used by Nix.";
       };
 
@@ -533,7 +533,10 @@ in
             }
           )
         );
-        inherit (managedDefault "determinateNix.registry" (literalExpression "{ }")) default defaultText;
+        inherit (managedDefault "determinateNix.registry" (lib.literalExpression "{ }"))
+          default
+          defaultText
+          ;
         description = ''
           The system-wide flake registry. We recommend using the registry only for CLI commands, such as
           `nix search nixpkgs ponysay` or `nix build nixpkgs#cowsay`, and not for flake references in Nix code.
@@ -587,7 +590,7 @@ in
 
             trusted-users = lib.mkOption {
               type = types.listOf types.str;
-              inherit (managedDefault "determinateNix.trusted-users" (literalExpression "[ ]"))
+              inherit (managedDefault "determinateNix.trusted-users" (lib.literalExpression "[ ]"))
                 default
                 defaultText
                 ;
