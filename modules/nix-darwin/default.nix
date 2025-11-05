@@ -329,18 +329,22 @@ in
           '';
         };
 
-        ephemeral = lib.mkEnableOption ''
-          Wipe the builder's filesystem on every restart.
+        ephemeral = lib.mkOption {
+          type = types.bool;
+          default = false;
+          description = ''
+            Wipe the builder's filesystem on every restart.
 
-          This is disabled by default because maintaining the builder's Nix store means fewer
-          rebuilds. You can enable this if you don't want your builder to accumulate
-          state.
-        '';
+            This is disabled by default because maintaining the builder's Nix store means fewer
+            rebuilds. You can enable this if you don't want your builder to accumulate
+            state.
+          '';
+        };
 
         mandatoryFeatures = lib.mkOption {
           type = types.listOf types.str;
           default = [ ];
-          defaultText = lib.literalExpression ''[]'';
+          defaultText = lib.literalExpression "[]";
           example = lib.literalExpression ''[ "big-parallel" ]'';
           description = ''
             A list of features mandatory for the Nixpkgs Linux builder. The builder is
@@ -391,7 +395,7 @@ in
         speedFactor = lib.mkOption {
           type = types.ints.positive;
           default = 1;
-          defaultText = lib.literalExpression ''1'';
+          defaultText = lib.literalExpression "1";
           description = ''
             The relative speed of the Nixpkgs Linux builder. This is an arbitrary integer
             that indicates the speed of this builder, relative to other
