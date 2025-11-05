@@ -65,12 +65,7 @@
             name = "determinate-dev";
 
             packages = with pkgs; [
-              lychee
-              nixfmt-rfc-style
-
-              (writeScriptBin "check-readme-links" ''
-                lychee README.md
-              '')
+              self.formatter.${system}
             ];
           };
         }
