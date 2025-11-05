@@ -703,11 +703,9 @@ in
           }
         ];
 
-        warnings = [
-          (lib.mkIf (
-            !cfg.distributedBuilds && cfg.buildMachines != [ ]
-          ) "`determinateNix.distributedBuilds` is not enabled, thus build machines aren't configured.")
-        ];
+        warnings = lib.optional (
+          !cfg.distributedBuilds && cfg.buildMachines != [ ]
+        ) "`determinateNix.distributedBuilds` is not enabled, thus build machines aren't configured.";
 
         # Disable nix-darwin's internal mechanisms for handling Nix configuration
         nix.enable = lib.mkForce false;
