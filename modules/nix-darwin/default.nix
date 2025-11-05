@@ -41,18 +41,6 @@ let
     "upgrade-nix-store-path-url"
   ];
 
-  managedDefault = name: default: defaultText: {
-    default =
-      if cfg.enable then
-        default
-      else
-        throw ''
-          ${name}: accessed when `determinateNix.enable` is off; this is a bug in
-          nix-darwin or a third-party module
-        '';
-    inherit defaultText;
-  };
-
   # Various constant values
   customConfFile = "nix/nix.custom.conf";
   registryFile = "nix/registry.json";
@@ -218,10 +206,8 @@ in
             };
           }
         );
-        inherit (managedDefault "determinateNix.buildMachines" (lib.literalExpression "[ ]"))
-          default
-          defaultText
-          ;
+        default = [ ];
+        defaultText = lib.literalExpression "[ ]";
         description = ''
           This option lists the machines to be used if distributed builds are
           enabled (see {option}`determinateNix.distributedBuilds`).
@@ -283,10 +269,8 @@ in
 
       distributedBuilds = lib.mkOption {
         type = types.bool;
-        inherit (managedDefault "determinateNix.distributedBuilds" (lib.literalExpression "false"))
-          default
-          defaultText
-          ;
+        default = false;
+        defaultText = lib.literalExpression "false";
         description = ''
           Whether to distribute builds to the machines listed in
           {option}`determinateNix.buildMachines`.
@@ -297,7 +281,8 @@ in
       envVars = lib.mkOption {
         type = types.attrs;
         internal = true;
-        inherit (managedDefault "determinateNix.envVars" (lib.literalExpression "{ }")) default defaultText;
+        default = { };
+        defaultText = lib.literalExpression "{ }";
         description = "Environment variables used by Nix.";
       };
 
@@ -533,10 +518,8 @@ in
             }
           )
         );
-        inherit (managedDefault "determinateNix.registry" (lib.literalExpression "{ }"))
-          default
-          defaultText
-          ;
+        default = { };
+        defaultText = lib.literalExpression "{ }";
         description = ''
           The system-wide flake registry. We recommend using the registry only for CLI commands, such as
           `nix search nixpkgs ponysay` or `nix build nixpkgs#cowsay`, and not for flake references in Nix code.
@@ -590,10 +573,8 @@ in
 
             trusted-users = lib.mkOption {
               type = types.listOf types.str;
-              inherit (managedDefault "determinateNix.trusted-users" (lib.literalExpression "[ ]"))
-                default
-                defaultText
-                ;
+              default = [ ];
+              defaultText = "[ ]";
               example = [
                 "root"
                 "alice"
