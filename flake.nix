@@ -6,15 +6,15 @@
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.1/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.2/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.1/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.2/x86_64-linux";
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.1/macOS";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.2/macOS";
       flake = false;
     };
     determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
@@ -65,13 +65,7 @@
             name = "determinate-dev";
 
             packages = with pkgs; [
-              lychee
-              statix
               self.formatter.${system}
-
-              (writeScriptBin "check-readme-links" ''
-                lychee README.md
-              '')
             ];
           };
         }

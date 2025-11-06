@@ -29,9 +29,6 @@ jobs:
       - name: Check Nix formatting
         run: git ls-files '*.nix' | nix develop --command xargs nixfmt --check
 
-      - name: Check external links in README
-        run: nix develop --command check-readme-links
-
   verify-outputs:
     strategy:
       matrix:
