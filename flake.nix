@@ -17,7 +17,6 @@
       url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.2/macOS";
       flake = false;
     };
-    determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
   };
 
   outputs =
@@ -27,7 +26,6 @@
         "x86_64-linux"
         "aarch64-linux"
         "aarch64-darwin"
-        "x86_64-darwin"
       ];
 
       forEachSupportedSystem =
