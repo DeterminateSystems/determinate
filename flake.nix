@@ -6,18 +6,17 @@
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.2/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.13.0/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.2/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.13.0/x86_64-linux";
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.12.2/macOS";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.13.0/macOS";
       flake = false;
     };
-    determinate-nixd-x86_64-darwin.follows = "determinate-nixd-aarch64-darwin";
   };
 
   outputs =
@@ -27,7 +26,6 @@
         "x86_64-linux"
         "aarch64-linux"
         "aarch64-darwin"
-        "x86_64-darwin"
       ];
 
       forEachSupportedSystem =
