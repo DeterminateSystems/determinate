@@ -249,7 +249,7 @@ in
             };
             builder.memoryBytes = lib.mkOption {
               type = types.ints.positive;
-              default = 8000000000;
+              default = 8589934592;
               description = ''
                 How much memory, in bytes, to allocate to the native Linux builder process.
               '';
