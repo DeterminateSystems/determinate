@@ -247,6 +247,20 @@ in
                 Whether Determinate Nix's native Linux builder is enabled.
               '';
             };
+            builder.memoryBytes = lib.mkOption {
+              type = types.ints.positive;
+              default = 8000000000;
+              description = ''
+                How much memory, in bytes, to allocate to the native Linux builder process.
+              '';
+            };
+            builder.cpuCount = lib.mkOption {
+              type = types.ints.positive;
+              default = 1;
+              description = ''
+                The number of CPUs to allocate to the native Linux builder process. We do NOT recommend changing this value.
+              '';
+            };
             garbageCollector.strategy = lib.mkOption {
               type = types.nullOr (
                 types.enum [
@@ -754,6 +768,14 @@ in
                       [
                         "builder"
                         "state"
+                      ]
+                      [
+                        "builder"
+                        "memoryBytes"
+                      ]
+                      [
+                        "builder"
+                        "cpuCount"
                       ]
                       [
                         "garbageCollector"
