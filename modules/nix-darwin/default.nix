@@ -723,6 +723,7 @@ in
 
         # Disable nix-darwin's internal mechanisms for handling Nix configuration
         nix.enable = lib.mkForce false;
+        nix.linux-builder.enable = lib.mkForce false;
 
         environment = {
           etc = {
