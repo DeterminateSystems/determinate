@@ -103,8 +103,8 @@ Here's an example nix-darwin configuration that would be compatible with Determi
 ```
 
 While Determinate Nix creates and manages the standard `nix.conf` file for you, you can set custom configuration in the `/etc/nix/nix.custom.conf` file, which is explained in more detail [in our documentation][configuring-determinate-nix].
-If you'd like to set that custom configuration using nix-darwin, you can use this `determinate` flake for that.
-Here's an example nix-darwin configuration that writes custom settings:
+If you'd like to set that custom configuration using nix-darwin, you can use the `customSettings` attribute for that.
+Here's an example:
 
 ```nix
 {
@@ -143,12 +143,31 @@ Here's an example nix-darwin configuration that writes custom settings:
 }
 ```
 
+You can also manage [Determinate Nixd's configuration][dnixd-config] using the `determinateNixd` attribute.
+This automatically creates a `/etc/determinate/config.json` file for you.
+Here's an example:
+
+```nix
+{
+  determinateNix = {
+    enable = true;
+    determinateNixd = {
+      garbageCollector.strategy = "disabled";
+      authentication.additionalNetrcSources = [
+        "/path/to/custom/netrc"
+      ];
+    };
+  };
+}
+```
+
 [actions]: https://github.com/features/actions
 [cache]: https://determinate.systems/posts/flakehub-cache-beta
 [configuring-determinate-nix]: https://docs.determinate.systems/determinate-nix#determinate-nix-configuration
 [det-nix]: https://determinate.systems/nix
 [detsys]: https://determinate.systems
 [dnixd]: https://docs.determinate.systems/determinate-nix#determinate-nixd
+[dnixd-config]: https://docs.determinate.systems/determinate-nix/#determinate-nixd-configuration
 [fh]: https://github.com/DeterminateSystems/fh
 [flakehub]: https://flakehub.com
 [flake-inputs]: https://zero-to-nix.com/concepts/flakes#inputs
