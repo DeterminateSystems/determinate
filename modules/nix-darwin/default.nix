@@ -305,7 +305,7 @@ in
 
         hostName = lib.mkOption {
           type = types.str;
-          default = "linux-builder";
+          default = "nixos-vm-based-linux-builder";
           description = ''
             The hostname for the NixOS-VM-based Linux builder.
           '';
@@ -723,7 +723,6 @@ in
 
         # Disable nix-darwin's internal mechanisms for handling Nix configuration
         nix.enable = lib.mkForce false;
-        nix.linux-builder.enable = lib.mkForce false;
 
         environment = {
           etc = {
