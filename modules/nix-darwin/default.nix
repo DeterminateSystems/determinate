@@ -633,11 +633,6 @@ in
             directory = nixosVmBasedLinuxBuilderCfg.workingDirectory;
           in
           ''
-            # Migrate if using the old working directory
-            if [ -e /var/lib/darwin-builder ] && [ ! -e ${directory} ]; then
-              mv /var/lib/darwin-builder ${directory}
-            fi
-
             mkdir -p ${directory}
           '';
 
