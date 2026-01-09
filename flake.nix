@@ -69,7 +69,7 @@
         }
       );
 
-      formatter = forEachSupportedSystem ({ pkgs, ... }: pkgs.nixfmt-rfc-style);
+      formatter = forEachSupportedSystem ({ pkgs, ... }: pkgs.nixfmt);
 
       darwinModules = {
         default = ./modules/nix-darwin/default.nix;
