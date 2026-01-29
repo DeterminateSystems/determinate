@@ -2,8 +2,11 @@
   description = "Determinate";
 
   inputs = {
-    nix.url = "https://flakehub.com/f/DeterminateSystems/nix-src/*";
-    nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
+    determinate-nix = {
+      url = "https://flakehub.com/f/DeterminateSystems/nix-src/*";
+      inputs.nixpkgs.follows = "determinate-nixpkgs";
+    };
+    determinate-nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
 
     determinate-nixd-aarch64-linux = {
       url = "https://install.determinate.systems/determinate-nixd/tag/v3.15.2/aarch64-linux";
@@ -20,7 +23,7 @@
   };
 
   outputs =
-    { self, nixpkgs, ... }@inputs:
+    { self, determinate-nixpkgs, ... }@inputs:
     let
       supportedSystems = [
         "x86_64-linux"
@@ -30,11 +33,11 @@
 
       forEachSupportedSystem =
         f:
-        nixpkgs.lib.genAttrs supportedSystems (
+        determinate-nixpkgs.lib.genAttrs supportedSystems (
           system:
           f {
             inherit system;
-            pkgs = import nixpkgs {
+            pkgs = import determinate-nixpkgs {
               inherit system;
               config = {
                 allowUnfree = true;
