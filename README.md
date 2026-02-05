@@ -66,6 +66,10 @@ Here's an example NixOS configuration for the current stable NixOS:
 
 ## nix-darwin
 
+> [!IMPORTANT]
+> Determinate's nix-darwin module does *not* install [Determinate Nix][det-nix] for you; consult our [installation instructions][docs] for that.
+> Instead, this module ensures that nix-darwin and Determinate Nix are compatible and provides some useful helpers for configuring Determinate Nix, including [Determinate Nixd][dnixd].
+
 If you use [nix-darwin] to provide Nix-based configuration for your macOS system, you need to disable nix-darwin's built-in Nix configuration mechanisms by applying the `determinate` nix-darwin module and setting `determinateNix.enable = true`; if not, Determinate Nix **does not work properly**.
 Here's an example nix-darwin configuration that would be compatible with Determinate Nix:
 
@@ -168,7 +172,7 @@ Here's an example:
 [detsys]: https://determinate.systems
 [dnixd]: https://docs.determinate.systems/determinate-nix#determinate-nixd
 [dnixd-config]: https://docs.determinate.systems/determinate-nix/#determinate-nixd-configuration
-[fh]: https://github.com/DeterminateSystems/fh
+[docs]: https://docs.determinate.systems
 [flakehub]: https://flakehub.com
 [flake-inputs]: https://zero-to-nix.com/concepts/flakes#inputs
 [flakes]: https://zero-to-nix.com/concepts/flakes
@@ -176,9 +180,7 @@ Here's an example:
 [gitlab-ci]: https://docs.gitlab.com/ee/ci
 [installer]: https://github.com/DeterminateSystems/nix-installer
 [keychain]: https://developer.apple.com/documentation/security/keychain-services
-[netrc]: https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
 [nix]: https://zero-to-nix.com/concepts/nix
-[nix-conf]: https://nix.dev/manual/nix/latest/command-ref/conf-file
 [nix-darwin]: https://github.com/nix-darwin/nix-darwin
 [nixos]: https://zero-to-nix.com/concepts/nixos
 [nixpkgs]: https://zero-to-nix.com/concepts/nixpkgs
