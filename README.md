@@ -40,8 +40,6 @@ To add the `determinate` flake as a [flake input][flake-inputs]:
 }
 ```
 
-> We recommend not using a [`follows`][follows] directive for [Nixpkgs] (`inputs.nixpkgs.follows = "nixpkgs"`) in conjunction with the Determinate flake, as it leads to cache misses for artifacts otherwise available from [FlakeHub Cache][cache].
-
 You can quickly set up Determinate using the `nixosModules.default` module output from this flake.
 Here's an example NixOS configuration for the current stable NixOS:
 
