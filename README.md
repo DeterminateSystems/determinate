@@ -173,10 +173,15 @@ This configuration, for example, would be compatible with Determinate Nix:
 ```nix
 {
   homeConfigurations.my-system = inputs.home-manager.lib.homeManagerConfiguration {
+    pkgs = import inputs.nixpkgs {
+      system = "x86_64-linux";
+    };
     modules = [
       {
         nix.package = null;
       }
+
+      # other modules
     ];
   };
 }
@@ -198,8 +203,13 @@ This configuration, for example, would be compatible with Determinate Nix:
 
   outputs = { self, ... }@inputs: {
     homeConfigurations.my-system = inputs.home-manager.lib.homeManagerConfiguration {
+      pkgs = import inputs.nixpkgs {
+        system = "x86_64-linux";
+      };
       modules = [
         inputs.determinate.homeManagerModules.default
+
+        # other modules
       ];
     };
   };
