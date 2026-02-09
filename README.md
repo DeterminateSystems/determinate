@@ -165,6 +165,47 @@ Here's an example:
 }
 ```
 
+## Home Manager
+
+If you use [Home Manager][home-manager] to provide Nix-based configuration for your system, if you set `nix.enable` to `true` you also need to set the `nix.package` attribute to `null` to ensure that you don't end up having a Nix that isn't Determinate Nix on your `PATH`.
+This configuration, for example, would be compatible with Determinate Nix:
+
+```nix
+{
+  homeConfigurations.my-system = inputs.home-manager.lib.homeManagerConfiguration {
+    modules = [
+      {
+        nix.package = null;
+      }
+    ];
+  };
+}
+```
+
+This `determinate` flake also provides a Home Manager module that does that for you.
+This configuration, for example, would be compatible with Determinate Nix:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
+    home-manager = {
+      url = "https://flakehub.com/f/nix-community/home-manager/0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = { self, ... }@inputs: {
+    homeConfigurations.my-system = inputs.home-manager.lib.homeManagerConfiguration {
+      modules = [
+        inputs.determinate.homeManagerModules.default
+      ];
+    };
+  };
+}
+```
+
 [actions]: https://github.com/features/actions
 [cache]: https://determinate.systems/posts/flakehub-cache-beta
 [configuring-determinate-nix]: https://docs.determinate.systems/determinate-nix#determinate-nix-configuration
@@ -178,6 +219,7 @@ Here's an example:
 [flakes]: https://zero-to-nix.com/concepts/flakes
 [follows]: https://zero-to-nix.com/concepts/flakes#inputs
 [gitlab-ci]: https://docs.gitlab.com/ee/ci
+[home-manager]: https://github.com/nix-community/home-manager
 [installer]: https://github.com/DeterminateSystems/nix-installer
 [keychain]: https://developer.apple.com/documentation/security/keychain-services
 [nix]: https://zero-to-nix.com/concepts/nix
