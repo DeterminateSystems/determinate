@@ -78,6 +78,8 @@
         migration = ./modules/nix-darwin/migration.nix;
       };
 
+      homeManagerModules.default = ./modules/home-manager/default.nix;
+
       nixosModules.default = import ./modules/nixos.nix inputs;
     };
 }

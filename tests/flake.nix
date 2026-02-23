@@ -3,7 +3,11 @@
     determinate.url = "path:../";
     nixpkgs.follows = "determinate/nix/nixpkgs";
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+      url = "https://flakehub.com/f/nix-darwin/nix-darwin/0.2505";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    home-manager = {
+      url = "https://flakehub.com/f/nix-community/home-manager/0.2505";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -32,6 +36,21 @@
           }).config.system.build.toplevel;
 
         aarch64-darwin = {
+          home-manager =
+            (inputs.home-manager.lib.homeManagerConfiguration {
+              pkgs = import inputs.nixpkgs {
+                system = "aarch64-darwin";
+              };
+              modules = [
+                inputs.determinate.homeManagerModules.default
+                {
+                  home.username = "test";
+                  home.homeDirectory = "/Users/test";
+                  home.stateVersion = "24.11";
+                }
+              ];
+            }).activationPackage;
+
           nix-darwin =
             (inputs.nix-darwin.lib.darwinSystem {
               system = "aarch64-darwin";
