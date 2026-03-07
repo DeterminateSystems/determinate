@@ -80,6 +80,9 @@
 
       homeManagerModules.default = ./modules/home-manager/default.nix;
 
+      # System-manager module
+      systemModules.default = import ./modules/system-manager.nix inputs;
+
       nixosModules.default = import ./modules/nixos.nix inputs;
     };
 }
