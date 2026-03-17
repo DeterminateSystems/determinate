@@ -47,12 +47,24 @@
       packages = forEachSupportedSystem (
         { system, pkgs, ... }:
         {
-          default = pkgs.runCommand "determinate-nixd" { } ''
-            mkdir -p $out/bin
-            cp ${inputs."determinate-nixd-${system}"} $out/bin/determinate-nixd
-            chmod +x $out/bin/determinate-nixd
-            $out/bin/determinate-nixd --help
-          '';
+          default = pkgs.stdenvNoCC.mkDerivation {
+            pname = "determinate-nixd";
+            inherit (inputs.nix.packages.${system}.default) version;
+
+            src = inputs."determinate-nixd-${system}";
+            dontUnpack = true;
+
+            installPhase = ''
+              mkdir -p $out/bin
+              cp $src $out/bin/determinate-nixd
+              chmod +x $out/bin/determinate-nixd
+            '';
+
+            doInstallCheck = true;
+            installCheckPhase = ''
+              $out/bin/determinate-nixd --help
+            '';
+          };
         }
       );
 
