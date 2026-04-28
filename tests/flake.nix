@@ -3,11 +3,11 @@
     determinate.url = "path:../";
     nixpkgs.follows = "determinate/nix/nixpkgs";
     nix-darwin = {
-      url = "https://flakehub.com/f/nix-darwin/nix-darwin/0.2505";
+      url = "https://flakehub.com/f/nix-darwin/nix-darwin/=0.2511";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "https://flakehub.com/f/nix-community/home-manager/0.2505";
+      url = "https://flakehub.com/f/nix-community/home-manager/=0.2511";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
