@@ -56,6 +56,15 @@ in
     enable = lib.mkEnableOption "Determinate Nix" // {
       default = true;
     };
+
+    edgeCacheSubstituters = lib.mkOption {
+      type = lib.types.nullOr (lib.types.listOf lib.types.str);
+      default = null;
+      example = [ "https://cache.example.com/" ];
+      description = ''
+        A list of substituter URLs that Determinate Nixd should treat as edge caches. These URLs are written as the top-level `edgeCacheSubstituters` key in {file}`/etc/determinate/config.json`.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -66,6 +75,12 @@ in
     # NOTE(cole-h): Move the generated nix.conf to /etc/nix/nix.custom.conf, which is included from
     # the Determinate Nixd-managed /etc/nix/nix.conf.
     environment.etc."nix/nix.conf".target = "nix/nix.custom.conf";
+
+    environment.etc."determinate/config.json" = lib.mkIf (cfg.edgeCacheSubstituters != null) {
+      text = builtins.toJSON {
+        edgeCacheSubstituters = cfg.edgeCacheSubstituters;
+      };
+    };
 
     systemd = {
       services.nix-daemon.serviceConfig = {
