@@ -273,6 +273,13 @@ in
                 The garbage collection strategy used by Determinate Nixd. `automatic` means that Determinate Nixd automatically collects garbage in the background while `disabled` means no garbage collection.
               '';
             };
+            telemetry.sentry.endpoint = lib.mkOption {
+              type = types.nullOr types.str;
+              default = "unset";
+              description = ''
+                The Sentry endpoint for uploading crash reports. Set to `null` to disable crash reporting.
+              '';
+            };
           };
         };
         default = { };
@@ -780,7 +787,12 @@ in
                   );
               in
               lib.mkIf (explicitlySetAttrs != { }) {
-                text = builtins.toJSON explicitlySetAttrs;
+                text = builtins.toJSON (
+                  explicitlySetAttrs
+                  // lib.optionalAttrs (dnixd.telemetry.sentry.endpoint != "unset") {
+                    telemetry.sentry.endpoint = dnixd.telemetry.sentry.endpoint;
+                  }
+                );
               };
 
             # List of machines for distributed Nix builds in the format
