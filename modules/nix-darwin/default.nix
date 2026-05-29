@@ -785,14 +785,14 @@ in
                       ]
                     ]
                   );
-              in
-              lib.mkIf (explicitlySetAttrs != { }) {
-                text = builtins.toJSON (
+                configAttrs =
                   explicitlySetAttrs
                   // lib.optionalAttrs (dnixd.telemetry.sentry.endpoint != "unset") {
                     telemetry.sentry.endpoint = dnixd.telemetry.sentry.endpoint;
-                  }
-                );
+                  };
+              in
+              lib.mkIf (configAttrs != { }) {
+                text = builtins.toJSON configAttrs;
               };
 
             # List of machines for distributed Nix builds in the format
