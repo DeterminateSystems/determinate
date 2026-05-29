@@ -280,6 +280,14 @@ in
                 The Sentry endpoint for uploading crash reports. Set to `null` to disable crash reporting.
               '';
             };
+            edgeCacheSubstituters = lib.mkOption {
+              type = types.nullOr (types.listOf types.str);
+              default = null;
+              example = [ "https://cache.example.com/" ];
+              description = ''
+                A list of substituter URLs that Determinate Nixd should treat as edge caches. These URLs are written as the top-level `edgeCacheSubstituters` key in {file}`/etc/determinate/config.json`.
+              '';
+            };
           };
         };
         default = { };
@@ -783,6 +791,7 @@ in
                         "garbageCollector"
                         "strategy"
                       ]
+                      [ "edgeCacheSubstituters" ]
                     ]
                   );
                 configAttrs =
