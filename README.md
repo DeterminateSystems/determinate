@@ -216,6 +216,49 @@ This configuration, for example, would be compatible with Determinate Nix:
 }
 ```
 
+## System Manager
+
+> [!IMPORTANT]
+> Determinate's system-manager module does *not* install [Determinate Nix][det-nix] for you; consult our [installation instructions][docs] for that.
+> Instead, this module ensures that your system-manager configuration is compatible with Determinate Nix and ensures the nix daemon is managed through
+> system-manager.
+
+If you use [System Manager] to manage the /etc configuration of your Linux system, add the determinate flake as an input and import the `systemModules.default` module within your system config:
+
+``` nix
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    system-manager.url = "github:numtide/system-manager";
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
+  };
+
+  outputs = { self, ... }@inputs {
+    systemConfigs.default = inputs.system-manager.lib.makeSystemConfig {
+      system = "x86_64-linux";
+      modules = [
+        # Load the Determinate module
+        inputs.determinate.systemModules.default
+      ];
+    };
+  };
+}
+```
+
+Then follow these migration steps:
+
+1. Run `nix run 'github:numtide/system-manager' -- switch --flake . --sudo` on your dotfiles to pick up the new configuration. Ensure you see the following errors:
+
+```
+[2026-03-07T19:32:25Z ERROR system_manager_engine::activate::etc_files] Error while trying to link directory /etc/.system-manager-static/systemd/system: Unmanaged path already exists in filesystem, please remove it and run system-manager again: /etc/systemd/system/determinate-nixd.socket
+[2026-03-07T19:32:25Z ERROR system_manager_engine::activate::etc_files] Error while trying to link directory /etc/.system-manager-static/systemd/system: Unmanaged path already exists in filesystem, please remove it and run system-manager again: /etc/systemd/system/nix-daemon.service
+[2026-03-07T19:32:25Z ERROR system_manager_engine::activate::etc_files] Error while trying to link directory /etc/.system-manager-static/systemd/system: Unmanaged path already exists in filesystem, please remove it and run system-manager again: /etc/systemd/system/nix-daemon.socket
+```
+
+2. Move each file that failed to install to a safe backup location. E.g. `for f in determinate-nixd.socket nix-daemon{.service,.socket}; do mv "/etc/systemd/system/$f{,.backup}; done"`
+
+3. Rerun `nix run 'github:numtide/system-manager' -- switch --flake . --sudo`
+
 [actions]: https://github.com/features/actions
 [cache]: https://determinate.systems/posts/flakehub-cache-beta
 [configuring-determinate-nix]: https://docs.determinate.systems/determinate-nix#determinate-nix-configuration
