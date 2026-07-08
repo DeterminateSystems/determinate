@@ -1,7 +1,7 @@
 {
   inputs = {
     determinate.url = "path:../";
-    nixpkgs.follows = "determinate/nix/nixpkgs";
+    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/=0.2511";
     nix-darwin = {
       url = "https://flakehub.com/f/nix-darwin/nix-darwin/=0.2511";
       inputs.nixpkgs.follows = "nixpkgs";
