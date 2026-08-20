@@ -81,6 +81,7 @@ Here's an example nix-darwin configuration that would be compatible with Determi
       url = "https://flakehub.com/f/nix-darwin/nix-darwin/0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
   };
 
   outputs = { self, ... }@inputs: {
