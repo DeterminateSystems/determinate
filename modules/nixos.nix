@@ -100,12 +100,17 @@ in
     # daemon reads must therefore be emitted from this single definition.
     environment.etc."determinate/config.json" =
       let
+        netrcSources = cfg.determinateNixd.authentication.additionalNetrcSources;
+
         configAttrs =
           lib.optionalAttrs (cfg.edgeCacheSubstituters != null) {
             inherit (cfg) edgeCacheSubstituters;
           }
-          // lib.optionalAttrs (cfg.determinateNixd.authentication.additionalNetrcSources != null) {
-            inherit (cfg.determinateNixd) authentication;
+          // lib.optionalAttrs (netrcSources != null) {
+            # NOTE: `builtins.toJSON` copies a Nix path value into `/nix/store` and serializes the
+            # resulting store path. That would publish the netrc contents world-readably and hand
+            # the daemon a source it refuses, so paths are flattened to plain strings first.
+            authentication.additionalNetrcSources = map builtins.toString netrcSources;
           };
       in
       lib.mkIf (configAttrs != { }) {
