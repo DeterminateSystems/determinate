@@ -6,15 +6,15 @@
     nixpkgs.url = "https://flakehub.com/f/DeterminateSystems/nixpkgs-weekly/0.1";
 
     determinate-nixd-aarch64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.22.4/aarch64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.22.5/aarch64-linux";
       flake = false;
     };
     determinate-nixd-x86_64-linux = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.22.4/x86_64-linux";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.22.5/x86_64-linux";
       flake = false;
     };
     determinate-nixd-aarch64-darwin = {
-      url = "https://install.determinate.systems/determinate-nixd/tag/v3.22.4/macOS";
+      url = "https://install.determinate.systems/determinate-nixd/tag/v3.22.5/macOS";
       flake = false;
     };
   };
