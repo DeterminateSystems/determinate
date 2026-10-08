@@ -67,7 +67,7 @@ in
           Like the standard nix-darwin module, this Determinate module enables you to configure:
 
           1. VM-based Nix builders using the `buildMachines` setting.
-          2. A local VM-based Linux builder from Nixpkgs. Note that this is distinct from Determinate Nix's own native Linux builder, which uses macOS's built-in Virtualization framework. We recommend using this native Linux builder but still support the Nixpkgs builder.
+          2. A local VM-based Linux builder from Nixpkgs. Note that this is distinct from Determinate Nix's own Native Linux Builder, which uses macOS's built-in Virtualization framework. We recommend using Native Linux Builder but still support the Nixpkgs builder.
         '';
       };
 
@@ -244,21 +244,21 @@ in
               );
               default = null;
               description = ''
-                Whether Determinate Nix's native Linux builder is enabled.
+                Whether Determinate Nix's Native Linux Builder is enabled.
               '';
             };
             builder.memoryBytes = lib.mkOption {
               type = types.ints.positive;
               default = 8589934592;
               description = ''
-                How much memory, in bytes, to allocate to the native Linux builder process.
+                How much memory, in bytes, to allocate to the Native Linux Builder process.
               '';
             };
             builder.cpuCount = lib.mkOption {
               type = types.ints.positive;
               default = 1;
               description = ''
-                The number of CPUs to allocate to the native Linux builder process. We do NOT recommend changing this value.
+                The number of CPUs to allocate to the Native Linux Builder process. We do NOT recommend changing this value.
               '';
             };
             garbageCollector.strategy = lib.mkOption {
@@ -316,7 +316,7 @@ in
       };
 
       nixosVmBasedLinuxBuilder = {
-        enable = lib.mkEnableOption "NixOS-VM-based Linux builder for macOS (distinct from Determinate Nix's native Linux builder, which we recommend)";
+        enable = lib.mkEnableOption "NixOS-VM-based Linux builder for macOS (distinct from Determinate Nix's Native Linux Builder, which we recommend)";
 
         hostName = lib.mkOption {
           type = types.str;
@@ -354,7 +354,7 @@ in
           '';
           description = ''
             This option specifies extra NixOS configuration for the Nixpkgs Linux builder.
-            You should first use the Nixpkgs Linux builder without changing the builder configuration, otherwise you may not be able to build the Linux builder (unless you're using the native Linux builder).
+            You should first use the Nixpkgs Linux builder without changing the builder configuration, otherwise you may not be able to build the Linux builder (unless you're using Native Linux Builder).
           '';
         };
 
@@ -709,7 +709,7 @@ in
                 ;
             }
           ];
-          # Override Determinate Nixd config to disable the native Linux builder
+          # Override Determinate Nixd config to disable Native Linux Builder
           determinateNixd.builder.state = "disabled";
           distributedBuilds = true;
           customSettings.builders-use-substitutes = true;
