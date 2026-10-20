@@ -104,6 +104,8 @@
 
               # Nothing is installed when disabled
               test ! -e ${disabled}/sw/share/zsh/site-functions/_determinate-nixd
+              test ! -e ${disabled}/sw/share/fish/vendor_completions.d/determinate-nixd.fish
+              test ! -e ${disabled}/sw/share/bash-completion/completions/determinate-nixd.bash
 
               touch $out
             '';
