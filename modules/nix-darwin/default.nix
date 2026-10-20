@@ -81,7 +81,7 @@ in
         default = true;
         description = ''
           Whether to install shell completions for {command}`determinate-nixd` for bash, fish, and zsh.
-          This module only installs the completion scripts, as the {command}`determinate-nixd` binary is managed by the Determinate Nix installer.
+          This module only installs the completion scripts, as the {command}`determinate-nixd` binary is managed by Determinate Nix Installer.
         '';
       };
 
@@ -749,7 +749,7 @@ in
         nix.enable = lib.mkForce false;
 
         environment = {
-          # Only the completions, since the Determinate Nix installer provides the binary itself
+          # Only the completions, since Determinate Nix Installer provides the binary itself
           systemPackages = lib.optional (cfg.shellCompletions.enable && determinateNixdPackage != null) (
             pkgs.runCommand "determinate-nixd-shell-completions" { } ''
               mkdir -p $out
