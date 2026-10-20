@@ -166,7 +166,7 @@ Here's an example:
 }
 ```
 
-The module also installs shell completions for `determinate-nixd` for the shells that nix-darwin manages.
+The module also installs shell completions for Determinate Nixd for the shells that nix-darwin manages.
 To opt out, set `determinateNix.shellCompletions.enable = false`.
 
 ## Home Manager
