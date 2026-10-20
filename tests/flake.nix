@@ -64,6 +64,50 @@
               ];
             }).system;
 
+          nix-darwin-shell-completions =
+            let
+              pkgs = import inputs.nixpkgs { system = "aarch64-darwin"; };
+
+              mkSystem =
+                enable:
+                (inputs.nix-darwin.lib.darwinSystem {
+                  system = "aarch64-darwin";
+
+                  modules = [
+                    inputs.determinate.darwinModules.default
+                    {
+                      determinateNix = {
+                        enable = true;
+                        shellCompletions.enable = enable;
+                      };
+                      # nix-darwin only links completions for the shells it manages
+                      programs = {
+                        bash.completion.enable = true;
+                        fish.enable = true;
+                      };
+                      system.stateVersion = 5;
+                    }
+                  ];
+                }).system;
+
+              enabled = mkSystem true;
+              disabled = mkSystem false;
+            in
+            pkgs.runCommand "nix-darwin-shell-completions" { } ''
+              # Completions are installed when enabled
+              test -e ${enabled}/sw/share/zsh/site-functions/_determinate-nixd
+              test -e ${enabled}/sw/share/fish/vendor_completions.d/determinate-nixd.fish
+              test -e ${enabled}/sw/share/bash-completion/completions/determinate-nixd.bash
+
+              # The binary itself is left to Determinate Nix Installer
+              test ! -e ${enabled}/sw/bin/determinate-nixd
+
+              # Nothing is installed when disabled
+              test ! -e ${disabled}/sw/share/zsh/site-functions/_determinate-nixd
+
+              touch $out
+            '';
+
           nix-darwin-custom-config =
             (inputs.nix-darwin.lib.darwinSystem {
               system = "aarch64-darwin";

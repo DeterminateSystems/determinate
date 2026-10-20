@@ -80,7 +80,7 @@ in
         type = types.bool;
         default = true;
         description = ''
-          Whether to install shell completions for {command}`determinate-nixd` for bash, fish, and zsh.
+          Whether to install shell completions for {command}`determinate-nixd` for the shells that nix-darwin manages (bash, fish, and zsh).
           This module only installs the completion scripts, as the {command}`determinate-nixd` binary is managed by Determinate Nix Installer.
         '';
       };
