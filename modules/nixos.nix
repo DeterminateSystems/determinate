@@ -65,6 +65,25 @@ in
         A list of substituter URLs that Determinate Nixd should treat as edge caches. These URLs are written as the top-level `edgeCacheSubstituters` key in {file}`/etc/determinate/config.json`.
       '';
     };
+
+    determinateNixd.authentication.additionalNetrcSources = lib.mkOption {
+      type = lib.types.nullOr (
+        lib.types.listOf (
+          lib.types.oneOf [
+            lib.types.path
+            lib.types.str
+          ]
+        )
+      );
+      default = null;
+      example = [ "/run/agenix/extra-netrc" ];
+      description = ''
+        A list of paths to `netrc` files that are combined by Determinate Nixd and used by
+        Determinate Nix. These files must exist and not be in `/nix/store` or the daemon refuses to
+        start. Written as the `authentication.additionalNetrcSources` key in
+        {file}`/etc/determinate/config.json`.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -76,11 +95,27 @@ in
     # the Determinate Nixd-managed /etc/nix/nix.conf.
     environment.etc."nix/nix.conf".target = "nix/nix.custom.conf";
 
-    environment.etc."determinate/config.json" = lib.mkIf (cfg.edgeCacheSubstituters != null) {
-      text = builtins.toJSON {
-        edgeCacheSubstituters = cfg.edgeCacheSubstituters;
+    # NOTE: `environment.etc.<name>.text` is `types.lines`, so two definitions of this entry are
+    # silently concatenated into invalid JSON rather than reported as a conflict. Every key the
+    # daemon reads must therefore be emitted from this single definition.
+    environment.etc."determinate/config.json" =
+      let
+        netrcSources = cfg.determinateNixd.authentication.additionalNetrcSources;
+
+        configAttrs =
+          lib.optionalAttrs (cfg.edgeCacheSubstituters != null) {
+            inherit (cfg) edgeCacheSubstituters;
+          }
+          // lib.optionalAttrs (netrcSources != null) {
+            # NOTE: `builtins.toJSON` copies a Nix path value into `/nix/store` and serializes the
+            # resulting store path. That would publish the netrc contents world-readably and hand
+            # the daemon a source it refuses, so paths are flattened to plain strings first.
+            authentication.additionalNetrcSources = map builtins.toString netrcSources;
+          };
+      in
+      lib.mkIf (configAttrs != { }) {
+        text = builtins.toJSON configAttrs;
       };
-    };
 
     systemd = {
       services.nix-daemon.serviceConfig = {
