@@ -54,10 +54,17 @@
             src = inputs."determinate-nixd-${system}";
             dontUnpack = true;
 
+            nativeBuildInputs = [ pkgs.installShellFiles ];
+
             installPhase = ''
               mkdir -p $out/bin
               cp $src $out/bin/determinate-nixd
               chmod +x $out/bin/determinate-nixd
+
+              installShellCompletion --cmd determinate-nixd \
+                --bash <($out/bin/determinate-nixd completion bash) \
+                --fish <($out/bin/determinate-nixd completion fish) \
+                --zsh <($out/bin/determinate-nixd completion zsh)
             '';
 
             doInstallCheck = true;
@@ -84,7 +91,7 @@
       formatter = forEachSupportedSystem ({ pkgs, ... }: pkgs.nixfmt);
 
       darwinModules = {
-        default = ./modules/nix-darwin/default.nix;
+        default = import ./modules/nix-darwin/default.nix inputs;
 
         # In case we come across anyone who still needs to migrate
         migration = ./modules/nix-darwin/migration.nix;
