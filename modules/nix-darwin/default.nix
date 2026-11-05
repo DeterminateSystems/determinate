@@ -1,3 +1,5 @@
+inputs:
+
 {
   config,
   lib,
@@ -45,6 +47,9 @@ let
   customConfFile = "nix/nix.custom.conf";
   registryFile = "nix/registry.json";
   builderIdentityFile = "/etc/nix/builder_ed25519";
+
+  # Determinate Nixd isn't built for every system that nix-darwin supports
+  determinateNixdPackage = inputs.self.packages.${pkgs.stdenv.system}.default or null;
 in
 {
   # Rename the `determinate-nix` attribute to `determinateNix` to standardize on dromedary case.
@@ -68,6 +73,15 @@ in
 
           1. VM-based Nix builders using the `buildMachines` setting.
           2. A local VM-based Linux builder from Nixpkgs. Note that this is distinct from Determinate Nix's own Native Linux Builder, which uses macOS's built-in Virtualization framework. We recommend using Native Linux Builder but still support the Nixpkgs builder.
+        '';
+      };
+
+      shellCompletions.enable = lib.mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          Whether to install shell completions for Determinate Nixd for the shells that nix-darwin manages (bash, fish, and zsh).
+          This module only installs the completion scripts, as the Determinate Nixd binary is managed by Determinate Nix Installer.
         '';
       };
 
@@ -735,6 +749,14 @@ in
         nix.enable = lib.mkForce false;
 
         environment = {
+          # Only the completions, since Determinate Nix Installer provides the binary itself
+          systemPackages = lib.optional (cfg.shellCompletions.enable && determinateNixdPackage != null) (
+            pkgs.runCommand "determinate-nixd-shell-completions" { } ''
+              mkdir -p $out
+              cp -r ${determinateNixdPackage}/share $out/share
+            ''
+          );
+
           etc = {
             ${customConfFile}.text = lib.concatStringsSep "\n" (
               [

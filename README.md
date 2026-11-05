@@ -166,6 +166,9 @@ Here's an example:
 }
 ```
 
+The module also installs shell completions for Determinate Nixd for the shells that nix-darwin manages.
+To opt out, set `determinateNix.shellCompletions.enable = false`.
+
 ## Home Manager
 
 If you use [Home Manager][home-manager] to provide Nix-based configuration for your system, if you set `nix.enable` to `true` you also need to set the `nix.package` attribute to `null` to ensure that you don't end up having a Nix that isn't Determinate Nix on your `PATH`.
