@@ -35,6 +35,49 @@
             ];
           }).config.system.build.toplevel;
 
+        # Regression test: a path-valued `additionalNetrcSources` entry must be serialized as the
+        # literal filesystem path. Handing the path straight to `builtins.toJSON` copies it into
+        # `/nix/store`, which publishes the netrc contents and yields a source the daemon rejects.
+        x86_64-linux.nixos-determinate-nixd-config =
+          let
+            nixos = inputs.nixpkgs.lib.nixosSystem {
+              system = "x86_64-linux";
+              modules = [
+                inputs.determinate.nixosModules.default
+                {
+                  fileSystems."/" = {
+                    device = "/dev/bogus";
+                    fsType = "ext4";
+                  };
+                  boot.loader.grub.devices = [ "/dev/bogus" ];
+                  system.stateVersion = "24.11";
+
+                  determinate = {
+                    edgeCacheSubstituters = [ "https://cache.example.com/" ];
+                    determinateNixd.authentication.additionalNetrcSources = [
+                      /etc/extra/netrc
+                      "/run/agenix/extra-netrc"
+                    ];
+                  };
+                }
+              ];
+            };
+
+            actual = nixos.config.environment.etc."determinate/config.json".text;
+
+            expected = builtins.toJSON {
+              edgeCacheSubstituters = [ "https://cache.example.com/" ];
+              authentication.additionalNetrcSources = [
+                "/etc/extra/netrc"
+                "/run/agenix/extra-netrc"
+              ];
+            };
+          in
+          assert inputs.nixpkgs.lib.assertMsg (
+            actual == expected
+          ) "/etc/determinate/config.json mismatch\n  actual:   ${actual}\n  expected: ${expected}";
+          nixos.pkgs.runCommand "nixos-determinate-nixd-config" { } "touch $out";
+
         aarch64-darwin = {
           home-manager =
             (inputs.home-manager.lib.homeManagerConfiguration {
